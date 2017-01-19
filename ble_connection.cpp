@@ -21,29 +21,17 @@ BLE_Connection::BLE_Connection(SensorNode_GUI *g)
 
     if (serial_handle == INVALID_HANDLE_VALUE)
     {
-        printf("Error opening serialport %s. %d\n","COM3",(int)GetLastError());
+        char buff[100];
+        snprintf(buff, sizeof(buff), "Error opening serialport %s. %d\n","COM3",(int)GetLastError());
+        gui->printText(buff);
     }
 
     bglib_output = output;
 
     //stop previous operation
-    ble_cmd_gap_end_procedure();
+//    ble_cmd_gap_end_procedure();
     //get connection status,current command will be handled in response
     ble_cmd_connection_get_status(0);
-//    for(int i = 0; i < 10; i++){
-//        read_message();
-//        printf("Readed message");
-//    }
-
-    //Message loop
-//    while(1)
-//    {
-//        if(read_message())
-//        {
-//            printf("Error reading message\n");
-//            break;
-//        }
-//    }
 }
 
 BLE_Connection::~BLE_Connection()
@@ -118,14 +106,8 @@ int BLE_Connection::read_message()
     return 0;
 }
 
-void BLE_Connection::print_help()
-{
-    printf("Demo application to scan devices\n");
-    printf("\tscan_example\tCOM-port\n");
-}
 
-
-//====================FUNCTIONS FROM stubs.c======================================
+//=============FUNCTIONS FOR HANDELING EVENTS AND RESPONSES====================
 
 
 void ble_evt_gap_scan_response(const struct ble_msg_gap_scan_response_evt_t *msg)
@@ -146,11 +128,10 @@ void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg
 {
     if(msg->flags&connection_connected)
     {
-        printf("#connected -> disconnect\n");
-        ble_cmd_connection_disconnect(msg->connection);
+        gui->printText("ConnectionEstablished");
     }else
     {
-        printf("#Not connected -> Scan\n");
+        gui->printText("#Not connected -> Scan");
         ble_cmd_gap_discover(1);
     }
 }
@@ -158,4 +139,22 @@ void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg
 void ble_evt_connection_disconnected(const struct ble_msg_connection_disconnected_evt_t *msg)
 {
     ble_cmd_connection_get_status(0);
+}
+
+void ble_rsp_gap_discover(const struct ble_msg_gap_discover_rsp_t *msg)
+{
+    gui->printText("Within method ble_rsp_gap_discover");
+    printf("%u\n", msg->result);
+    gui->printText((std::to_string(msg->result)));
+}
+
+void ble_rsp_gap_connect_direct(const ble_msg_gap_connect_direct_rsp_t *msg)
+{
+    printf("%u\n",msg->result);
+    std::string buffAsStdStr;
+    char buff[100];
+    snprintf(buff, sizeof(buff), "%u",msg->result);
+    buffAsStdStr = buff;
+    gui->printText("Connected!!!!");
+    gui->printText(buffAsStdStr);
 }

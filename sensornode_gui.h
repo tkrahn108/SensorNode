@@ -25,10 +25,14 @@ public:
     QTimer *ScanTimer;
 
 private slots:
-    void on_pushButton_clicked();
+    void on_pushButtonStartScanning_clicked();
     void scanForDevices();
 
-    void on_pushButton_2_clicked();
+    void on_pushButtonStopScanning_clicked();
+
+    void on_pushButtonConnect_clicked();
+
+    void on_pushButtonDisconnect_clicked();
 
 private:
     Ui::SensorNode_GUI *ui;

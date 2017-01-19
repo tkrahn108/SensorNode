@@ -503,13 +503,13 @@ void ble_rsp_gap_set_mode(const struct ble_msg_gap_set_mode_rsp_t *msg)
 {
 }
 
-void ble_rsp_gap_discover(const struct ble_msg_gap_discover_rsp_t *msg)
-{
-}
+//void ble_rsp_gap_discover(const struct ble_msg_gap_discover_rsp_t *msg)
+//{
+//}
 
-void ble_rsp_gap_connect_direct(const struct ble_msg_gap_connect_direct_rsp_t *msg)
-{
-}
+//void ble_rsp_gap_connect_direct(const struct ble_msg_gap_connect_direct_rsp_t *msg)
+//{
+//}
 
 void ble_rsp_gap_end_procedure(const struct ble_msg_gap_end_procedure_rsp_t *msg)
 {

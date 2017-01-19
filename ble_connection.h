@@ -18,9 +18,6 @@ public:
     ~BLE_Connection();
     static void output(uint8,uint8*,uint16,uint8*);
     int read_message();
-
-private:
-    void print_help();
 };
 
 #endif // BLE_CONNECTION_H

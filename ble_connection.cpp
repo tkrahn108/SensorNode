@@ -124,28 +124,12 @@ void BLE_Connection::print_help()
     printf("\tscan_example\tCOM-port\n");
 }
 
-void BLE_Connection::startScanning()
-{
-    while(1)
-        {
-            if(read_message())
-            {
-                gui->printText("Error reading message\n");
-                break;
-            }
-        }
-}
-
 
 //====================FUNCTIONS FROM stubs.c======================================
 
 
 void ble_evt_gap_scan_response(const struct ble_msg_gap_scan_response_evt_t *msg)
 {
-//    int i;
-//    for(i=0;i<6;i++)
-//        printf("%02x%s",msg->sender.addr[5-i],i<5?":":"");
-//    printf("\t%d\n",msg->rssi);
     int i;
     std::string buffAsStdStr;
     char buff[100];

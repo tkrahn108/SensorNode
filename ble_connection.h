@@ -18,7 +18,7 @@ public:
     ~BLE_Connection();
     static void output(uint8,uint8*,uint16,uint8*);
     int read_message();
-    void startScanning();
+
 private:
     void print_help();
 };

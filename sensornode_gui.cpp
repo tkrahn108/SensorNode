@@ -1,12 +1,14 @@
 #include "sensornode_gui.h"
 #include "ui_sensornode_gui.h"
 
+
 SensorNode_GUI::SensorNode_GUI(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::SensorNode_GUI)
 {
     ui->setupUi(this);
-
+    ScanTimer = new QTimer(this);
+    connect(ScanTimer, SIGNAL(timeout()),this, SLOT(scanForDevices()));
 }
 
 SensorNode_GUI::~SensorNode_GUI()
@@ -25,16 +27,15 @@ void SensorNode_GUI::setBLEConnection(BLE_Connection *ble_connect)
 
 void SensorNode_GUI::on_pushButton_clicked()
 {
-    //ble->startScanning();
-    for(int i = 0; i<10; i++){
-        ble->read_message();
-    }
-    while(1)
-       {
-            if(ble->read_message())
-            {
-                printText("Error reading message\n");
-                break;
-            }
-        }
+    ScanTimer->start(1000);
+}
+
+void SensorNode_GUI::scanForDevices()
+{
+    ble->read_message();
+}
+
+void SensorNode_GUI::on_pushButton_2_clicked()
+{
+    ScanTimer->stop();
 }

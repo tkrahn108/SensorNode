@@ -9,14 +9,16 @@
 #include "apitypes.h"
 #include "sensornode_gui.h"
 
-class ble_connection
+class SensorNode_GUI;
+
+class BLE_Connection
 {
 public:
-    ble_connection(SensorNode_GUI *g);
-    ~ble_connection();
+    BLE_Connection(SensorNode_GUI*);
+    ~BLE_Connection();
     static void output(uint8,uint8*,uint16,uint8*);
     int read_message();
-
+    void startScanning();
 private:
     void print_help();
 };

@@ -3,7 +3,7 @@
 volatile HANDLE serial_handle;
 SensorNode_GUI *gui;
 
-ble_connection::ble_connection(SensorNode_GUI *g)
+BLE_Connection::BLE_Connection(SensorNode_GUI *g)
 {
     gui = g;
 
@@ -30,10 +30,10 @@ ble_connection::ble_connection(SensorNode_GUI *g)
     ble_cmd_gap_end_procedure();
     //get connection status,current command will be handled in response
     ble_cmd_connection_get_status(0);
-    for(int i = 0; i < 10; i++){
-        read_message();
-        printf("Readed message");
-    }
+//    for(int i = 0; i < 10; i++){
+//        read_message();
+//        printf("Readed message");
+//    }
 
     //Message loop
 //    while(1)
@@ -46,12 +46,12 @@ ble_connection::ble_connection(SensorNode_GUI *g)
 //    }
 }
 
-ble_connection::~ble_connection()
+BLE_Connection::~BLE_Connection()
 {
 
 }
 
-void ble_connection::output(uint8 len1,uint8* data1,uint16 len2,uint8* data2)
+void BLE_Connection::output(uint8 len1,uint8* data1,uint16 len2,uint8* data2)
 {
     DWORD written;
 
@@ -78,7 +78,7 @@ void ble_connection::output(uint8 len1,uint8* data1,uint16 len2,uint8* data2)
         }
 }
 
-int ble_connection::read_message()
+int BLE_Connection::read_message()
 {
     DWORD rread;
     const struct ble_msg *apimsg;
@@ -118,10 +118,22 @@ int ble_connection::read_message()
     return 0;
 }
 
-void ble_connection::print_help()
+void BLE_Connection::print_help()
 {
     printf("Demo application to scan devices\n");
     printf("\tscan_example\tCOM-port\n");
+}
+
+void BLE_Connection::startScanning()
+{
+    while(1)
+        {
+            if(read_message())
+            {
+                gui->printText("Error reading message\n");
+                break;
+            }
+        }
 }
 
 
@@ -130,11 +142,20 @@ void ble_connection::print_help()
 
 void ble_evt_gap_scan_response(const struct ble_msg_gap_scan_response_evt_t *msg)
 {
+//    int i;
+//    for(i=0;i<6;i++)
+//        printf("%02x%s",msg->sender.addr[5-i],i<5?":":"");
+//    printf("\t%d\n",msg->rssi);
     int i;
-    for(i=0;i<6;i++)
-        printf("%02x%s",msg->sender.addr[5-i],i<5?":":"");
-    printf("\t%d\n",msg->rssi);
-    gui->printText("Läuft");
+    std::string buffAsStdStr;
+    char buff[100];
+    for(i=0;i<6;i++){
+        snprintf(buff, sizeof(buff), "%02x%s",msg->sender.addr[5-i],i<5?":":"");
+        buffAsStdStr += buff;
+    }
+    snprintf(buff, sizeof(buff), "\t%d",msg->rssi);
+    buffAsStdStr += buff;
+    gui->printText(buffAsStdStr);
 }
 
 void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg)

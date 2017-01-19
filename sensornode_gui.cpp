@@ -6,6 +6,7 @@ SensorNode_GUI::SensorNode_GUI(QWidget *parent) :
     ui(new Ui::SensorNode_GUI)
 {
     ui->setupUi(this);
+
 }
 
 SensorNode_GUI::~SensorNode_GUI()
@@ -17,7 +18,23 @@ void SensorNode_GUI::printText(std::string s){
     ui->textEdit->append(QString::fromStdString(s));
 }
 
+void SensorNode_GUI::setBLEConnection(BLE_Connection *ble_connect)
+{
+    ble = ble_connect;
+}
+
 void SensorNode_GUI::on_pushButton_clicked()
 {
-    printText("Test");
+    //ble->startScanning();
+    for(int i = 0; i<10; i++){
+        ble->read_message();
+    }
+    while(1)
+       {
+            if(ble->read_message())
+            {
+                printText("Error reading message\n");
+                break;
+            }
+        }
 }

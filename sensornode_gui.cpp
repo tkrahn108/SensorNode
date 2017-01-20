@@ -27,7 +27,7 @@ void SensorNode_GUI::setBLEConnection(BLE_Connection *ble_connect)
 
 void SensorNode_GUI::on_pushButtonStartScanning_clicked()
 {
-    ScanTimer->start(100);
+    ScanTimer->start(150);
 }
 
 void SensorNode_GUI::scanForDevices()
@@ -42,11 +42,11 @@ void SensorNode_GUI::on_pushButtonStopScanning_clicked()
 
 void SensorNode_GUI::on_pushButtonConnect_clicked()
 {
-    uint8 addr[6] = {0xe6, 0x27, 0x6b, 0xc2, 0x37, 0xe0};
-    ble_cmd_gap_connect_direct(addr, 1, 50, 3200, 400, 0);
+    ble->connect();
+//    ScanTimer->stop();
 }
 
 void SensorNode_GUI::on_pushButtonDisconnect_clicked()
 {
-
+    ble_cmd_connection_disconnect(1);
 }

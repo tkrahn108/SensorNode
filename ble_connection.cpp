@@ -6,7 +6,6 @@ SensorNode_GUI *gui;
 BLE_Connection::BLE_Connection(SensorNode_GUI *g)
 {
     gui = g;
-
     char str[80];
     snprintf(str,sizeof(str)-1,"\\\\.\\%s","COM3");
     //open I/O device
@@ -29,14 +28,16 @@ BLE_Connection::BLE_Connection(SensorNode_GUI *g)
     bglib_output = output;
 
     //stop previous operation
-//    ble_cmd_gap_end_procedure();
+    ble_cmd_gap_end_procedure();
     //get connection status,current command will be handled in response
     ble_cmd_connection_get_status(0);
 }
 
 BLE_Connection::~BLE_Connection()
 {
-
+    ble_cmd_connection_disconnect(0);
+    ble_cmd_connection_disconnect(1);
+    CloseHandle(serial_handle);
 }
 
 void BLE_Connection::output(uint8 len1,uint8* data1,uint16 len2,uint8* data2)
@@ -106,6 +107,10 @@ int BLE_Connection::read_message()
     return 0;
 }
 
+void BLE_Connection::connect(){
+    uint8 addr[6] = {0xe6, 0x27, 0x6b, 0xc2, 0x37, 0xe0};
+    ble_cmd_gap_connect_direct(addr, 1, 50, 3200, 400, 0);
+}
 
 //=============FUNCTIONS FOR HANDELING EVENTS AND RESPONSES====================
 
@@ -115,23 +120,47 @@ void ble_evt_gap_scan_response(const struct ble_msg_gap_scan_response_evt_t *msg
     int i;
     std::string buffAsStdStr;
     char buff[100];
+    char *name = NULL;
     for(i=0;i<6;i++){
         snprintf(buff, sizeof(buff), "%02x%s",msg->sender.addr[5-i],i<5?":":"");
         buffAsStdStr += buff;
     }
+
+    // Parse data to get the name
+    for (i = 0; i < msg->data.len; ) {
+        int8 len = msg->data.data[i++];
+        if (!len) continue;
+        if (i + len > msg->data.len) break; // not enough data
+        uint8 type = msg->data.data[i++];
+        switch (type) {
+        case 0x09:
+            name = (char*) malloc(len);
+            memcpy(name, msg->data.data + i, len - 1);
+            name[len - 1] = '\0';
+        }
+
+        i += len - 1;
+    }
+
+    if (name) snprintf(buff, sizeof(buff), "\t%s", name);
+    else snprintf(buff, sizeof(buff), "\t%s", "Unknown");
+    buffAsStdStr += buff;
+
     snprintf(buff, sizeof(buff), "\t%d",msg->rssi);
     buffAsStdStr += buff;
     gui->printText(buffAsStdStr);
+
+    free(name);
 }
 
 void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg)
 {
     if(msg->flags&connection_connected)
     {
-        gui->printText("ConnectionEstablished");
+        gui->printText("Connection established");
     }else
     {
-        gui->printText("#Not connected -> Scan");
+//        gui->printText("#Not connected -> Scan");
         ble_cmd_gap_discover(1);
     }
 }
@@ -143,18 +172,16 @@ void ble_evt_connection_disconnected(const struct ble_msg_connection_disconnecte
 
 void ble_rsp_gap_discover(const struct ble_msg_gap_discover_rsp_t *msg)
 {
-    gui->printText("Within method ble_rsp_gap_discover");
-    printf("%u\n", msg->result);
-    gui->printText((std::to_string(msg->result)));
+//    gui->printText("Within method ble_rsp_gap_discover");
+//    printf("%u\n", msg->result);
+//    gui->printText((std::to_string(msg->result)));
 }
 
 void ble_rsp_gap_connect_direct(const ble_msg_gap_connect_direct_rsp_t *msg)
 {
-    printf("%u\n",msg->result);
-    std::string buffAsStdStr;
-    char buff[100];
-    snprintf(buff, sizeof(buff), "%u",msg->result);
-    buffAsStdStr = buff;
-    gui->printText("Connected!!!!");
-    gui->printText(buffAsStdStr);
+    if(msg->result == 0){
+        gui->printText("Connected!!!!");
+    } else {
+        gui->printText("An error occured during connection establishment!");
+    }
 }

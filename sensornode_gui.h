@@ -2,7 +2,7 @@
 #define SENSORNODE_GUI_H
 
 #include <QMainWindow>
-#include <QTimer>
+#include <QThread>
 #include "ble_connection.h"
 
 namespace Ui {
@@ -19,10 +19,10 @@ public:
     explicit SensorNode_GUI(QWidget *parent = 0);
     ~SensorNode_GUI();
     void printText(std::string s);
-    void setBLEConnection(BLE_Connection *ble_connect);
+//    void setBLEConnection(BLE_Connection *ble_connect);
 
-    BLE_Connection *ble;
-    QTimer *ScanTimer;
+//    BLE_Connection *ble;
+//    QTimer *ScanTimer;
 
 private slots:
     void on_pushButtonStartScanning_clicked();
@@ -36,6 +36,8 @@ private slots:
 
 private:
     Ui::SensorNode_GUI *ui;
+    QThread *thread;
+    BLE_Connection *ble_worker;
 
 };
 

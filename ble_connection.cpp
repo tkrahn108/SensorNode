@@ -1,11 +1,11 @@
 #include "ble_connection.h"
 
 volatile HANDLE serial_handle;
-SensorNode_GUI *gui;
+uint8 connection_handle;
 
-BLE_Connection::BLE_Connection(SensorNode_GUI *g)
+BLE_Connection::BLE_Connection(QObject *parent) :
+    QObject(parent)
 {
-    gui = g;
     char str[80];
     snprintf(str,sizeof(str)-1,"\\\\.\\%s","COM3");
     //open I/O device
@@ -22,10 +22,11 @@ BLE_Connection::BLE_Connection(SensorNode_GUI *g)
     {
         char buff[100];
         snprintf(buff, sizeof(buff), "Error opening serialport %s. %d\n","COM3",(int)GetLastError());
-        gui->printText(buff);
+        //        gui->printText(buff);
     }
 
     bglib_output = output;
+    messageCaptured = false;
 
     //stop previous operation
     ble_cmd_gap_end_procedure();
@@ -33,11 +34,43 @@ BLE_Connection::BLE_Connection(SensorNode_GUI *g)
     ble_cmd_connection_get_status(0);
 }
 
-BLE_Connection::~BLE_Connection()
+//BLE_Connection::~BLE_Connection()
+//{
+//    ble_cmd_connection_disconnect(0);
+//    ble_cmd_connection_disconnect(1);
+//    CloseHandle(serial_handle);
+//}
+
+void BLE_Connection::requestWork()
 {
-    ble_cmd_connection_disconnect(0);
-    ble_cmd_connection_disconnect(1);
-    CloseHandle(serial_handle);
+    mutex.lock();
+    _working = true;
+    _abort = false;
+    //    qDebug()<<"Request worker start in Thread "<<thread()->currentThreadId();
+    mutex.unlock();
+
+    emit workRequested();
+}
+
+void BLE_Connection::abort()
+{
+    mutex.lock();
+    if (_working) {
+        _abort = true;
+        //        qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
+    }
+    mutex.unlock();
+}
+
+void BLE_Connection::doWork()
+{
+    while(true){
+        if( messageCaptured ){
+            emit valueChanged(QString::fromStdString(message));
+            messageCaptured = false;
+        }
+        read_message();
+    }
 }
 
 void BLE_Connection::output(uint8 len1,uint8* data1,uint16 len2,uint8* data2)
@@ -50,10 +83,10 @@ void BLE_Connection::output(uint8 len1,uint8* data1,uint16 len2,uint8* data2)
                    &written,
                    NULL
                    ))
-        {
-            printf("ERROR: Writing data. %d\n",(int)GetLastError());
-            exit(-1);
-        }
+    {
+        printf("ERROR: Writing data. %d\n",(int)GetLastError());
+        exit(-1);
+    }
 
     if(!WriteFile (serial_handle,
                    data2,
@@ -61,10 +94,10 @@ void BLE_Connection::output(uint8 len1,uint8* data1,uint16 len2,uint8* data2)
                    &written,
                    NULL
                    ))
-        {
-            printf("ERROR: Writing data. %d\n",(int)GetLastError());
-            exit(-1);
-        }
+    {
+        printf("ERROR: Writing data. %d\n",(int)GetLastError());
+        exit(-1);
+    }
 }
 
 int BLE_Connection::read_message()
@@ -76,25 +109,25 @@ int BLE_Connection::read_message()
     //read header
 
     if(!ReadFile(serial_handle,
-               (unsigned char*)&apihdr,
-               4,
-               &rread,
-               NULL))
-        {
-            return GetLastError();
-        }
+                 (unsigned char*)&apihdr,
+                 4,
+                 &rread,
+                 NULL))
+    {
+        return GetLastError();
+    }
     if(!rread)return 0;
     //read rest if needed
     if(apihdr.lolen)
     {
         if(!ReadFile(serial_handle,
-                   data,
-                   apihdr.lolen,
-                   &rread,
-                   NULL))
-            {
-                return GetLastError();
-            }
+                     data,
+                     apihdr.lolen,
+                     &rread,
+                     NULL))
+        {
+            return GetLastError();
+        }
     }
     apimsg=ble_get_msg_hdr(apihdr);
     if(!apimsg)
@@ -107,9 +140,16 @@ int BLE_Connection::read_message()
     return 0;
 }
 
-void BLE_Connection::connect(){
+void BLE_Connection::connect()
+{
     uint8 addr[6] = {0xe6, 0x27, 0x6b, 0xc2, 0x37, 0xe0};
     ble_cmd_gap_connect_direct(addr, 1, 50, 3200, 400, 0);
+}
+
+void BLE_Connection::disconnect()
+{
+    //TODO change argument to connection_handle
+    ble_cmd_connection_disconnect(1);
 }
 
 //=============FUNCTIONS FOR HANDELING EVENTS AND RESPONSES====================
@@ -148,7 +188,8 @@ void ble_evt_gap_scan_response(const struct ble_msg_gap_scan_response_evt_t *msg
 
     snprintf(buff, sizeof(buff), "\t%d",msg->rssi);
     buffAsStdStr += buff;
-    gui->printText(buffAsStdStr);
+    message = buffAsStdStr;
+    messageCaptured = true;
 
     free(name);
 }
@@ -157,10 +198,11 @@ void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg
 {
     if(msg->flags&connection_connected)
     {
-        gui->printText("Connection established");
+        //        gui->printText("Connection established");
+        connection_handle = msg->connection;
     }else
     {
-//        gui->printText("#Not connected -> Scan");
+        //        gui->printText("#Not connected -> Scan");
         ble_cmd_gap_discover(1);
     }
 }
@@ -172,16 +214,16 @@ void ble_evt_connection_disconnected(const struct ble_msg_connection_disconnecte
 
 void ble_rsp_gap_discover(const struct ble_msg_gap_discover_rsp_t *msg)
 {
-//    gui->printText("Within method ble_rsp_gap_discover");
-//    printf("%u\n", msg->result);
-//    gui->printText((std::to_string(msg->result)));
+    //    gui->printText("Within method ble_rsp_gap_discover");
+    //    printf("%u\n", msg->result);
+    //    gui->printText((std::to_string(msg->result)));
 }
 
 void ble_rsp_gap_connect_direct(const ble_msg_gap_connect_direct_rsp_t *msg)
 {
     if(msg->result == 0){
-        gui->printText("Connected!!!!");
+        //        gui->printText("Try to connect");
     } else {
-        gui->printText("An error occured during connection establishment!");
+        //        gui->printText("An error occured during connection establishment!");
     }
 }

@@ -9,6 +9,7 @@ namespace Ui {
 class SensorNode_GUI;
 }
 
+struct ble_message;
 class BLE_Connection;
 
 class SensorNode_GUI : public QMainWindow
@@ -19,20 +20,14 @@ public:
     explicit SensorNode_GUI(QWidget *parent = 0);
     ~SensorNode_GUI();
     void printText(std::string s);
-//    void setBLEConnection(BLE_Connection *ble_connect);
-
-//    BLE_Connection *ble;
-//    QTimer *ScanTimer;
 
 private slots:
     void on_pushButtonStartScanning_clicked();
     void scanForDevices();
-
     void on_pushButtonStopScanning_clicked();
-
     void on_pushButtonConnect_clicked();
-
     void on_pushButtonDisconnect_clicked();
+    void setNewMessage(ble_message);
 
 private:
     Ui::SensorNode_GUI *ui;

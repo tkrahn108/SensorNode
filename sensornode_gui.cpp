@@ -8,19 +8,25 @@ SensorNode_GUI::SensorNode_GUI(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    //register own struct to use it in signal slot mechanism
+    qRegisterMetaType<ble_message>("ble_message");
+
     thread = new QThread();
     ble_worker = new BLE_Connection();
 
     ble_worker->moveToThread(thread);
 
-    connect(ble_worker, SIGNAL(workRequested()), thread, SLOT(start()));
-    connect(thread, SIGNAL(started()), ble_worker, SLOT(doWork()));
-    connect(ble_worker, SIGNAL(valueChanged(QString)), ui->textEdit, SLOT(append(QString)), Qt::ConnectionType::QueuedConnection);
+    connect(ble_worker, SIGNAL(scanRequested()), thread, SLOT(start()));
+    connect(thread, SIGNAL(started()), ble_worker, SLOT(doScan()));
+    connect(ble_worker, SIGNAL(valueChanged(ble_message)), this, SLOT(setNewMessage(ble_message)), Qt::ConnectionType::QueuedConnection);
+    connect(ble_worker, SIGNAL(aborted()), thread, SLOT(quit()));
 }
 
 SensorNode_GUI::~SensorNode_GUI()
 {
-    //TODO Why do I get the messasge: Destroyed while thread is still running
+    ble_worker->abort();
+    thread->wait();
+
     delete thread;
     delete ble_worker;
 
@@ -33,7 +39,7 @@ void SensorNode_GUI::printText(std::string s){
 
 void SensorNode_GUI::on_pushButtonStartScanning_clicked()
 {
-    ble_worker->requestWork();
+    ble_worker->requestScan();
 }
 
 void SensorNode_GUI::scanForDevices()
@@ -43,7 +49,7 @@ void SensorNode_GUI::scanForDevices()
 
 void SensorNode_GUI::on_pushButtonStopScanning_clicked()
 {
-//    ScanTimer->stop();
+    ble_worker->abort();
 }
 
 void SensorNode_GUI::on_pushButtonConnect_clicked()
@@ -55,4 +61,9 @@ void SensorNode_GUI::on_pushButtonConnect_clicked()
 void SensorNode_GUI::on_pushButtonDisconnect_clicked()
 {
 //    ble->disconnect();
+}
+
+void SensorNode_GUI::setNewMessage(ble_message msg)
+{
+    ui->textEdit->append(QString::fromStdString(msg.name));
 }

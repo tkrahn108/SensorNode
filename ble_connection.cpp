@@ -34,14 +34,7 @@ BLE_Connection::BLE_Connection(QObject *parent) :
     ble_cmd_connection_get_status(0);
 }
 
-//BLE_Connection::~BLE_Connection()
-//{
-//    ble_cmd_connection_disconnect(0);
-//    ble_cmd_connection_disconnect(1);
-//    CloseHandle(serial_handle);
-//}
-
-void BLE_Connection::requestWork()
+void BLE_Connection::requestScan()
 {
     mutex.lock();
     _working = true;
@@ -49,7 +42,7 @@ void BLE_Connection::requestWork()
     //    qDebug()<<"Request worker start in Thread "<<thread()->currentThreadId();
     mutex.unlock();
 
-    emit workRequested();
+    emit scanRequested();
 }
 
 void BLE_Connection::abort()
@@ -57,16 +50,18 @@ void BLE_Connection::abort()
     mutex.lock();
     if (_working) {
         _abort = true;
+        _working = false;
         //        qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
     }
     mutex.unlock();
+    emit aborted();
 }
 
-void BLE_Connection::doWork()
+void BLE_Connection::doScan()
 {
-    while(true){
+    while(!_abort){
         if( messageCaptured ){
-            emit valueChanged(QString::fromStdString(message));
+            emit valueChanged(message);
             messageCaptured = false;
         }
         read_message();
@@ -157,16 +152,9 @@ void BLE_Connection::disconnect()
 
 void ble_evt_gap_scan_response(const struct ble_msg_gap_scan_response_evt_t *msg)
 {
-    int i;
-    std::string buffAsStdStr;
-    char buff[100];
-    char *name = NULL;
-    for(i=0;i<6;i++){
-        snprintf(buff, sizeof(buff), "%02x%s",msg->sender.addr[5-i],i<5?":":"");
-        buffAsStdStr += buff;
-    }
-
     // Parse data to get the name
+    int i;
+    char *name = NULL;
     for (i = 0; i < msg->data.len; ) {
         int8 len = msg->data.data[i++];
         if (!len) continue;
@@ -182,13 +170,10 @@ void ble_evt_gap_scan_response(const struct ble_msg_gap_scan_response_evt_t *msg
         i += len - 1;
     }
 
-    if (name) snprintf(buff, sizeof(buff), "\t%s", name);
-    else snprintf(buff, sizeof(buff), "\t%s", "Unknown");
-    buffAsStdStr += buff;
-
-    snprintf(buff, sizeof(buff), "\t%d",msg->rssi);
-    buffAsStdStr += buff;
-    message = buffAsStdStr;
+    message.ble_adress = msg->sender;
+    if(name) message.name = name;
+    else message.name = "Unknown";
+    message.rssi = msg->rssi;
     messageCaptured = true;
 
     free(name);

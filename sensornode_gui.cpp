@@ -24,6 +24,7 @@ SensorNode_GUI::SensorNode_GUI(QWidget *parent) :
 
 SensorNode_GUI::~SensorNode_GUI()
 {
+    ble_worker->disconnect();
     ble_worker->abort();
     thread->wait();
 
@@ -54,13 +55,12 @@ void SensorNode_GUI::on_pushButtonStopScanning_clicked()
 
 void SensorNode_GUI::on_pushButtonConnect_clicked()
 {
-//    ble->connect();
-//    ScanTimer->stop();
+    ble_worker->connect();
 }
 
 void SensorNode_GUI::on_pushButtonDisconnect_clicked()
 {
-//    ble->disconnect();
+    ble_worker->disconnect();
 }
 
 void SensorNode_GUI::setNewMessage(ble_message msg)

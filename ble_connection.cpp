@@ -144,7 +144,7 @@ void BLE_Connection::connect()
 void BLE_Connection::disconnect()
 {
     //TODO change argument to connection_handle
-    ble_cmd_connection_disconnect(1);
+    ble_cmd_connection_disconnect(0);
 }
 
 //=============FUNCTIONS FOR HANDELING EVENTS AND RESPONSES====================
@@ -184,6 +184,8 @@ void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg
     if(msg->flags&connection_connected)
     {
         //        gui->printText("Connection established");
+        message.name = "Connection established";
+        messageCaptured = true;
         connection_handle = msg->connection;
     }else
     {
@@ -208,6 +210,8 @@ void ble_rsp_gap_connect_direct(const ble_msg_gap_connect_direct_rsp_t *msg)
 {
     if(msg->result == 0){
         //        gui->printText("Try to connect");
+        message.name = "Try to connect";
+        messageCaptured = true;
     } else {
         //        gui->printText("An error occured during connection establishment!");
     }

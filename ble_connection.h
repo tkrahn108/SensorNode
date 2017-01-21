@@ -24,7 +24,6 @@ struct ble_message {
 Q_DECLARE_METATYPE(ble_message)
 
 static bool messageCaptured;
-//static std::string message;
 static ble_message message;
 
 class BLE_Connection : public QObject

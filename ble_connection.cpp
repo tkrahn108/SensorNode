@@ -2,7 +2,7 @@
 
 volatile HANDLE serial_handle;
 #define MAX_DEVICES 64
-int found_devices_count;
+
 bd_addr found_devices[MAX_DEVICES];
 uint8 primary_service_uuid[] = {0x00, 0x28};
 uint8 connection_handle;
@@ -27,14 +27,12 @@ BLE_Connection::BLE_Connection(QObject *parent) :
     {
         char buff[100];
         snprintf(buff, sizeof(buff), "Error opening serialport %s. %d\n","COM3",(int)GetLastError());
-        //        gui->printText(buff);
     }
 
     bglib_output = output;
 
     messageCaptured = false;
     found_devices_count = 0;
-    _interrupt = false;
 
     //stop previous operation
     ble_cmd_gap_end_procedure();
@@ -45,20 +43,16 @@ BLE_Connection::BLE_Connection(QObject *parent) :
 void BLE_Connection::requestMethod(BLE_Connection::Method method)
 {
     qDebug()<<"Request worker Method"<<method<<"in Thread "<<thread()->currentThreadId();
-//    QMutexLocker locker(&mutex);
     mutex.lock();
-    _interrupt = true;
     _method = method;
     mutex.unlock();
-//    condition.wakeOne();
 }
 
 void BLE_Connection::requestScan()
 {
     mutex.lock();
-    _working = true;
     _abort = false;
-    //    qDebug()<<"Request worker start in Thread "<<thread()->currentThreadId();
+    qDebug()<<"requestScan in Thread "<<thread()->currentThreadId();
     mutex.unlock();
 
     emit scanRequested();
@@ -66,43 +60,28 @@ void BLE_Connection::requestScan()
 
 void BLE_Connection::abort()
 {
-//    mutex.lock();
-//    if (_working) {
-//        _abort = true;
-//        _working = false;
-//        //        qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
-//    }
-//    mutex.unlock();
-//    emit aborted();
     qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
-//    QMutexLocker locker(&mutex);
     mutex.lock();
     _abort = true;
     mutex.unlock();
-//    condition.wakeOne();
+    emit aborted();
 }
 
 void BLE_Connection::doScan()
 {
     while(!_abort){
-        qDebug() << "Within doSan";
         if( messageCaptured ){
             emit valueChanged(message);
             messageCaptured = false;
         }
 
         mutex.lock();
-//        if (!_interrupt && !_abort) {
-//            condition.wait(&mutex);
-//        }
-        _interrupt = false;
 
         Method method = _method;
         mutex.unlock();
 
         switch(method) {
         case DoNothing:
-            qDebug() << "Do nothing";
             break;
         case Connect:
             connect();
@@ -121,12 +100,6 @@ void BLE_Connection::doScan()
         requestMethod(DoNothing);
 
         read_message();
-    }
-
-    if (_abort) {
-        qDebug()<<"Aborting worker mainLoop in Thread "<<thread()->currentThreadId();
-        mutex.unlock();
-        emit aborted();
     }
 }
 
@@ -207,6 +180,7 @@ void BLE_Connection::disconnect()
 {
     //TODO change argument to connection_handle
     ble_cmd_connection_disconnect(0);
+    qDebug() << "disconnect requested";
 }
 
 void BLE_Connection::primaryServiceDiscovery()
@@ -255,6 +229,8 @@ void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg
         message.name = "Connection established";
         messageCaptured = true;
         connection_handle = msg->connection;
+        found_devices_count++;
+        qDebug() << "Added Device: " << found_devices_count;
     }else
     {
         //        gui->printText("#Not connected -> Scan");
@@ -265,6 +241,7 @@ void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg
 void ble_evt_connection_disconnected(const struct ble_msg_connection_disconnected_evt_t *msg)
 {
     ble_cmd_connection_get_status(0);
+    found_devices_count--;
 }
 
 void ble_rsp_gap_discover(const struct ble_msg_gap_discover_rsp_t *msg)

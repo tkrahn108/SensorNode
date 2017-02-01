@@ -26,6 +26,7 @@ Q_DECLARE_METATYPE(ble_message)
 
 static bool messageCaptured;
 static ble_message message;
+static int found_devices_count;
 
 class BLE_Connection : public QObject
 {
@@ -62,16 +63,8 @@ private:
      * @brief Currently requested method
      */
     Method _method;
-    /**
-     * @brief Current method is interrupted when @em true
-     */
-    bool _interrupt;
-    /**
-     * @brief Condition used to wait for a new request to be called in the #mainLoop()
-     */
-    QWaitCondition condition;
+
     bool _abort;
-    bool _working;
     QMutex mutex;
 
     void primaryServiceDiscovery();

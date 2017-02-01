@@ -29,6 +29,12 @@ private slots:
     void on_pushButtonDisconnect_clicked();
     void setNewMessage(ble_message);
 
+    void on_pushButtonServiceDiscover_clicked();
+
+    void on_pushButtonCharacterisitcDiscover_clicked();
+
+    void on_pushButtonDescriptorDiscover_clicked();
+
 private:
     Ui::SensorNode_GUI *ui;
     QThread *thread;

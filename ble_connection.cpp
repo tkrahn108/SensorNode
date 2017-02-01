@@ -1,12 +1,17 @@
 #include "ble_connection.h"
 
 volatile HANDLE serial_handle;
+#define MAX_DEVICES 64
+int found_devices_count;
+bd_addr found_devices[MAX_DEVICES];
+uint8 primary_service_uuid[] = {0x00, 0x28};
 uint8 connection_handle;
 
 BLE_Connection::BLE_Connection(QObject *parent) :
     QObject(parent)
 {
     char str[80];
+    //TODO getting serialport from GUI
     snprintf(str,sizeof(str)-1,"\\\\.\\%s","COM3");
     //open I/O device
     serial_handle = CreateFileA(str,
@@ -26,12 +31,26 @@ BLE_Connection::BLE_Connection(QObject *parent) :
     }
 
     bglib_output = output;
+
     messageCaptured = false;
+    found_devices_count = 0;
+    _interrupt = false;
 
     //stop previous operation
     ble_cmd_gap_end_procedure();
     //get connection status,current command will be handled in response
     ble_cmd_connection_get_status(0);
+}
+
+void BLE_Connection::requestMethod(BLE_Connection::Method method)
+{
+    qDebug()<<"Request worker Method"<<method<<"in Thread "<<thread()->currentThreadId();
+//    QMutexLocker locker(&mutex);
+    mutex.lock();
+    _interrupt = true;
+    _method = method;
+    mutex.unlock();
+//    condition.wakeOne();
 }
 
 void BLE_Connection::requestScan()
@@ -47,24 +66,67 @@ void BLE_Connection::requestScan()
 
 void BLE_Connection::abort()
 {
+//    mutex.lock();
+//    if (_working) {
+//        _abort = true;
+//        _working = false;
+//        //        qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
+//    }
+//    mutex.unlock();
+//    emit aborted();
+    qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
+//    QMutexLocker locker(&mutex);
     mutex.lock();
-    if (_working) {
-        _abort = true;
-        _working = false;
-        //        qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
-    }
+    _abort = true;
     mutex.unlock();
-    emit aborted();
+//    condition.wakeOne();
 }
 
 void BLE_Connection::doScan()
 {
     while(!_abort){
+        qDebug() << "Within doSan";
         if( messageCaptured ){
             emit valueChanged(message);
             messageCaptured = false;
         }
+
+        mutex.lock();
+//        if (!_interrupt && !_abort) {
+//            condition.wait(&mutex);
+//        }
+        _interrupt = false;
+
+        Method method = _method;
+        mutex.unlock();
+
+        switch(method) {
+        case DoNothing:
+            qDebug() << "Do nothing";
+            break;
+        case Connect:
+            connect();
+            break;
+        case Disconnect:
+            disconnect();
+            break;
+        case PrimaryServiceDiscovery:
+            primaryServiceDiscovery();
+            break;
+         default:
+            qDebug() << "Default in switch case";
+            break;
+        }
+
+        requestMethod(DoNothing);
+
         read_message();
+    }
+
+    if (_abort) {
+        qDebug()<<"Aborting worker mainLoop in Thread "<<thread()->currentThreadId();
+        mutex.unlock();
+        emit aborted();
     }
 }
 
@@ -147,6 +209,12 @@ void BLE_Connection::disconnect()
     ble_cmd_connection_disconnect(0);
 }
 
+void BLE_Connection::primaryServiceDiscovery()
+{
+    uint8 uuid_len = sizeof(primary_service_uuid);
+    ble_cmd_attclient_read_by_group_type(connection_handle, 0x0001, 0xFFFF, uuid_len, primary_service_uuid);
+}
+
 //=============FUNCTIONS FOR HANDELING EVENTS AND RESPONSES====================
 
 
@@ -215,4 +283,10 @@ void ble_rsp_gap_connect_direct(const ble_msg_gap_connect_direct_rsp_t *msg)
     } else {
         //        gui->printText("An error occured during connection establishment!");
     }
+}
+
+void ble_evt_attclient_group_found(const struct ble_msg_attclient_group_found_evt_t * msg)
+{
+    message.name = "ble_evt_attclient_group_found";
+    messageCaptured = true;
 }

@@ -619,9 +619,9 @@ void ble_evt_attclient_procedure_completed(const struct ble_msg_attclient_proced
 {
 }
 
-void ble_evt_attclient_group_found(const struct ble_msg_attclient_group_found_evt_t *msg)
-{
-}
+//void ble_evt_attclient_group_found(const struct ble_msg_attclient_group_found_evt_t *msg)
+//{
+//}
 
 void ble_evt_attclient_attribute_found(const struct ble_msg_attclient_attribute_found_evt_t *msg)
 {

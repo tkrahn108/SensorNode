@@ -24,10 +24,10 @@ SensorNode_GUI::SensorNode_GUI(QWidget *parent) :
 
 SensorNode_GUI::~SensorNode_GUI()
 {
-    ble_worker->disconnect();
+    //ble_worker->disconnect();
     ble_worker->abort();
     thread->wait();
-
+    qDebug()<<"Deleting thread and worker in Thread "<<this->QObject::thread()->currentThreadId();
     delete thread;
     delete ble_worker;
 
@@ -55,15 +55,30 @@ void SensorNode_GUI::on_pushButtonStopScanning_clicked()
 
 void SensorNode_GUI::on_pushButtonConnect_clicked()
 {
-    ble_worker->connect();
+    ble_worker->requestMethod(BLE_Connection::Connect);
 }
 
 void SensorNode_GUI::on_pushButtonDisconnect_clicked()
 {
-    ble_worker->disconnect();
+    ble_worker->requestMethod(BLE_Connection::Disconnect);
 }
 
 void SensorNode_GUI::setNewMessage(ble_message msg)
 {
     ui->textEdit->append(QString::fromStdString(msg.name));
+}
+
+void SensorNode_GUI::on_pushButtonServiceDiscover_clicked()
+{
+    ble_worker->requestMethod(BLE_Connection::PrimaryServiceDiscovery);
+}
+
+void SensorNode_GUI::on_pushButtonCharacterisitcDiscover_clicked()
+{
+
+}
+
+void SensorNode_GUI::on_pushButtonDescriptorDiscover_clicked()
+{
+
 }

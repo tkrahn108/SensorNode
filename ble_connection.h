@@ -5,6 +5,7 @@
 #include <QMutex>
 #include <QDebug>
 #include <QThread>
+#include <QWaitCondition>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -34,16 +35,48 @@ public:
     explicit BLE_Connection(QObject *parent = 0);
     static void output(uint8,uint8*,uint16,uint8*);
     int read_message();
-    void connect();
-    void disconnect();
 
     void requestScan();
     void abort();
 
+    /**
+     * @brief This enum describes the various available methods
+     */
+    enum Method {
+        DoNothing = 0,
+        Connect = 1,
+        Disconnect = 2,
+        PrimaryServiceDiscovery = 3
+    };
+
+    /**
+     * @brief Requests for the method @em method to be executed
+     *
+     * This method will defines #_method and set #_abort to interrupt current method.
+     * It is thread safe as it uses #mutex to protect access to #_method and #_abort variable.
+     */
+    void requestMethod(Method method);
+
 private:
+    /**
+     * @brief Currently requested method
+     */
+    Method _method;
+    /**
+     * @brief Current method is interrupted when @em true
+     */
+    bool _interrupt;
+    /**
+     * @brief Condition used to wait for a new request to be called in the #mainLoop()
+     */
+    QWaitCondition condition;
     bool _abort;
     bool _working;
     QMutex mutex;
+
+    void primaryServiceDiscovery();
+    void connect();
+    void disconnect();
 
 signals:
     void scanRequested();

@@ -43,17 +43,16 @@ BLE_Connection::BLE_Connection(QObject *parent) :
 void BLE_Connection::requestMethod(BLE_Connection::Method method)
 {
     qDebug()<<"Request worker Method"<<method<<"in Thread "<<thread()->currentThreadId();
-    mutex.lock();
+    QMutexLocker locker(&mutex);
     _method = method;
-    mutex.unlock();
+
 }
 
 void BLE_Connection::requestScan()
 {
-    mutex.lock();
+    QMutexLocker locker(&mutex);
     _abort = false;
     qDebug()<<"requestScan in Thread "<<thread()->currentThreadId();
-    mutex.unlock();
 
     emit scanRequested();
 }
@@ -61,9 +60,8 @@ void BLE_Connection::requestScan()
 void BLE_Connection::abort()
 {
     qDebug()<<"Request worker aborting in Thread "<<thread()->currentThreadId();
-    mutex.lock();
+    QMutexLocker locker(&mutex);
     _abort = true;
-    mutex.unlock();
     emit aborted();
 }
 
@@ -76,7 +74,6 @@ void BLE_Connection::doScan()
         }
 
         mutex.lock();
-
         Method method = _method;
         mutex.unlock();
 
@@ -99,7 +96,8 @@ void BLE_Connection::doScan()
 
         requestMethod(DoNothing);
 
-        read_message();
+        int readed = read_message();
+        qDebug() << "ReadMessage: " << readed;
     }
 }
 
@@ -137,7 +135,7 @@ int BLE_Connection::read_message()
     struct ble_header apihdr;
     unsigned char data[256];//enough for BLE
     //read header
-
+    qDebug() << "I'm here, first";
     if(!ReadFile(serial_handle,
                  (unsigned char*)&apihdr,
                  4,
@@ -146,6 +144,7 @@ int BLE_Connection::read_message()
     {
         return GetLastError();
     }
+     qDebug() << "I'm here, second";
     if(!rread)return 0;
     //read rest if needed
     if(apihdr.lolen)
@@ -159,6 +158,7 @@ int BLE_Connection::read_message()
             return GetLastError();
         }
     }
+    qDebug() << "I'm here, third";
     apimsg=ble_get_msg_hdr(apihdr);
     if(!apimsg)
     {
@@ -166,7 +166,7 @@ int BLE_Connection::read_message()
         return -1;
     }
     apimsg->handler(data);
-
+    qDebug() << "I'm here, fourth";
     return 0;
 }
 
@@ -180,6 +180,8 @@ void BLE_Connection::disconnect()
 {
     //TODO change argument to connection_handle
     ble_cmd_connection_disconnect(0);
+    qDebug() << "Try to disconnect!";
+    //ble_cmd_gap_end_procedure();
     qDebug() << "disconnect requested";
 }
 
@@ -223,14 +225,15 @@ void ble_evt_gap_scan_response(const struct ble_msg_gap_scan_response_evt_t *msg
 
 void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg)
 {
-    if(msg->flags&connection_connected)
+    if(msg->flags&connection_completed)
     {
         //        gui->printText("Connection established");
-        message.name = "Connection established";
+        message.name = "New connection established";
         messageCaptured = true;
         connection_handle = msg->connection;
         found_devices_count++;
         qDebug() << "Added Device: " << found_devices_count;
+        qDebug() << "Connection Handle: " << connection_handle;
     }else
     {
         //        gui->printText("#Not connected -> Scan");
@@ -242,7 +245,17 @@ void ble_evt_connection_disconnected(const struct ble_msg_connection_disconnecte
 {
     ble_cmd_connection_get_status(0);
     found_devices_count--;
+    qDebug() << "Removed Device: " << found_devices_count;
 }
+
+void ble_rsp_connection_disconnect(const struct ble_msg_connection_disconnect_rsp_t * msg)
+{
+                                       if(msg->result == 0){
+                                           qDebug() << "Connection handle " << msg->connection << ": Disconnection procedure successfully started. ";
+                                       } else {
+                                           qDebug() << "Connection handle " << msg->connection << "Disconnection procedure failed. " << msg->result;
+                                       }
+                                   }
 
 void ble_rsp_gap_discover(const struct ble_msg_gap_discover_rsp_t *msg)
 {

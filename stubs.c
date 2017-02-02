@@ -419,9 +419,9 @@ void ble_rsp_attributes_read_type(const struct ble_msg_attributes_read_type_rsp_
 {
 }
 
-void ble_rsp_connection_disconnect(const struct ble_msg_connection_disconnect_rsp_t *msg)
-{
-}
+//void ble_rsp_connection_disconnect(const struct ble_msg_connection_disconnect_rsp_t *msg)
+//{
+//}
 
 void ble_rsp_connection_get_rssi(const struct ble_msg_connection_get_rssi_rsp_t *msg)
 {

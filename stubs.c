@@ -181,6 +181,11 @@ void ble_rsp_sm_set_security_mode(const void *nul)
 
 }
 
+void ble_rsp_sm_set_pairing_distribution_keys(const struct ble_msg_sm_set_pairing_distribution_keys_rsp_t *msg)
+{
+
+}
+
 void ble_rsp_gap_set_filtering(const struct ble_msg_gap_set_filtering_rsp_t *msg)
 {
 
@@ -515,6 +520,10 @@ void ble_rsp_gap_end_procedure(const struct ble_msg_gap_end_procedure_rsp_t *msg
 {
 }
 
+void ble_rsp_gap_set_nonresolvable_address(const struct ble_msg_gap_set_nonresolvable_address_rsp_t *msg)
+{
+}
+
 void ble_rsp_hardware_io_port_config_irq(const struct ble_msg_hardware_io_port_config_irq_rsp_t *msg)
 {
 }
@@ -524,6 +533,10 @@ void ble_rsp_hardware_set_soft_timer(const struct ble_msg_hardware_set_soft_time
 }
 
 void ble_rsp_hardware_adc_read(const struct ble_msg_hardware_adc_read_rsp_t *msg)
+{
+}
+
+void ble_rsp_hardware_sleep_enable(const struct ble_msg_hardware_sleep_enable_rsp_t *msg)
 {
 }
 

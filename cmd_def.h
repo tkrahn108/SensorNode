@@ -342,6 +342,7 @@ enum ble_command_ids
 	ble_cmd_sm_get_bonds_id=5,
 	ble_cmd_sm_set_oob_data_id=6,
 	ble_cmd_sm_whitelist_bonds_id=7,
+	ble_cmd_sm_set_pairing_distribution_keys_id=8,
 	ble_cmd_gap_set_privacy_flags_id=0,
 	ble_cmd_gap_set_mode_id=1,
 	ble_cmd_gap_discover_id=2,
@@ -354,6 +355,7 @@ enum ble_command_ids
 	ble_cmd_gap_set_adv_data_id=9,
 	ble_cmd_gap_set_directed_connectable_mode_id=10,
 	ble_cmd_gap_set_initiating_con_parameters_id=11,
+	ble_cmd_gap_set_nonresolvable_address_id=12,
 	ble_cmd_hardware_io_port_config_irq_id=0,
 	ble_cmd_hardware_set_soft_timer_id=1,
 	ble_cmd_hardware_adc_read_id=2,
@@ -375,6 +377,7 @@ enum ble_command_ids
 	ble_cmd_hardware_analog_comparator_config_irq_id=18,
 	ble_cmd_hardware_set_rxgain_id=19,
 	ble_cmd_hardware_usb_enable_id=20,
+	ble_cmd_hardware_sleep_enable_id=21,
 	ble_cmd_test_phy_tx_id=0,
 	ble_cmd_test_phy_rx_id=1,
 	ble_cmd_test_phy_end_id=2,
@@ -452,6 +455,7 @@ enum ble_response_ids
 	ble_rsp_sm_get_bonds_id=5,
 	ble_rsp_sm_set_oob_data_id=6,
 	ble_rsp_sm_whitelist_bonds_id=7,
+	ble_rsp_sm_set_pairing_distribution_keys_id=8,
 	ble_rsp_gap_set_privacy_flags_id=0,
 	ble_rsp_gap_set_mode_id=1,
 	ble_rsp_gap_discover_id=2,
@@ -464,6 +468,7 @@ enum ble_response_ids
 	ble_rsp_gap_set_adv_data_id=9,
 	ble_rsp_gap_set_directed_connectable_mode_id=10,
 	ble_rsp_gap_set_initiating_con_parameters_id=11,
+	ble_rsp_gap_set_nonresolvable_address_id=12,
 	ble_rsp_hardware_io_port_config_irq_id=0,
 	ble_rsp_hardware_set_soft_timer_id=1,
 	ble_rsp_hardware_adc_read_id=2,
@@ -485,6 +490,7 @@ enum ble_response_ids
 	ble_rsp_hardware_analog_comparator_config_irq_id=18,
 	ble_rsp_hardware_set_rxgain_id=19,
 	ble_rsp_hardware_usb_enable_id=20,
+	ble_rsp_hardware_sleep_enable_id=21,
 	ble_rsp_test_phy_tx_id=0,
 	ble_rsp_test_phy_rx_id=1,
 	ble_rsp_test_phy_end_id=2,
@@ -600,192 +606,198 @@ enum ble_msg_idx
 	ble_cmd_sm_get_bonds_idx =60,
 	ble_cmd_sm_set_oob_data_idx =61,
 	ble_cmd_sm_whitelist_bonds_idx =62,
-	ble_cmd_gap_set_privacy_flags_idx =63,
-	ble_cmd_gap_set_mode_idx =64,
-	ble_cmd_gap_discover_idx =65,
-	ble_cmd_gap_connect_direct_idx =66,
-	ble_cmd_gap_end_procedure_idx =67,
-	ble_cmd_gap_connect_selective_idx =68,
-	ble_cmd_gap_set_filtering_idx =69,
-	ble_cmd_gap_set_scan_parameters_idx =70,
-	ble_cmd_gap_set_adv_parameters_idx =71,
-	ble_cmd_gap_set_adv_data_idx =72,
-	ble_cmd_gap_set_directed_connectable_mode_idx =73,
-	ble_cmd_gap_set_initiating_con_parameters_idx =74,
-	ble_cmd_hardware_io_port_config_irq_idx =75,
-	ble_cmd_hardware_set_soft_timer_idx =76,
-	ble_cmd_hardware_adc_read_idx =77,
-	ble_cmd_hardware_io_port_config_direction_idx =78,
-	ble_cmd_hardware_io_port_config_function_idx =79,
-	ble_cmd_hardware_io_port_config_pull_idx =80,
-	ble_cmd_hardware_io_port_write_idx =81,
-	ble_cmd_hardware_io_port_read_idx =82,
-	ble_cmd_hardware_spi_config_idx =83,
-	ble_cmd_hardware_spi_transfer_idx =84,
-	ble_cmd_hardware_i2c_read_idx =85,
-	ble_cmd_hardware_i2c_write_idx =86,
-	ble_cmd_hardware_set_txpower_idx =87,
-	ble_cmd_hardware_timer_comparator_idx =88,
-	ble_cmd_hardware_io_port_irq_enable_idx =89,
-	ble_cmd_hardware_io_port_irq_direction_idx =90,
-	ble_cmd_hardware_analog_comparator_enable_idx =91,
-	ble_cmd_hardware_analog_comparator_read_idx =92,
-	ble_cmd_hardware_analog_comparator_config_irq_idx =93,
-	ble_cmd_hardware_set_rxgain_idx =94,
-	ble_cmd_hardware_usb_enable_idx =95,
-	ble_cmd_test_phy_tx_idx =96,
-	ble_cmd_test_phy_rx_idx =97,
-	ble_cmd_test_phy_end_idx =98,
-	ble_cmd_test_phy_reset_idx =99,
-	ble_cmd_test_get_channel_map_idx =100,
-	ble_cmd_test_debug_idx =101,
-	ble_cmd_test_channel_mode_idx =102,
-	ble_cmd_dfu_reset_idx =103,
-	ble_cmd_dfu_flash_set_address_idx =104,
-	ble_cmd_dfu_flash_upload_idx =105,
-	ble_cmd_dfu_flash_upload_finish_idx =106,
-	ble_rsp_system_reset_idx =107,
-	ble_rsp_system_hello_idx =108,
-	ble_rsp_system_address_get_idx =109,
-	ble_rsp_system_reg_write_idx =110,
-	ble_rsp_system_reg_read_idx =111,
-	ble_rsp_system_get_counters_idx =112,
-	ble_rsp_system_get_connections_idx =113,
-	ble_rsp_system_read_memory_idx =114,
-	ble_rsp_system_get_info_idx =115,
-	ble_rsp_system_endpoint_tx_idx =116,
-	ble_rsp_system_whitelist_append_idx =117,
-	ble_rsp_system_whitelist_remove_idx =118,
-	ble_rsp_system_whitelist_clear_idx =119,
-	ble_rsp_system_endpoint_rx_idx =120,
-	ble_rsp_system_endpoint_set_watermarks_idx =121,
-	ble_rsp_system_aes_setkey_idx =122,
-	ble_rsp_system_aes_encrypt_idx =123,
-	ble_rsp_system_aes_decrypt_idx =124,
-	ble_rsp_flash_ps_defrag_idx =125,
-	ble_rsp_flash_ps_dump_idx =126,
-	ble_rsp_flash_ps_erase_all_idx =127,
-	ble_rsp_flash_ps_save_idx =128,
-	ble_rsp_flash_ps_load_idx =129,
-	ble_rsp_flash_ps_erase_idx =130,
-	ble_rsp_flash_erase_page_idx =131,
-	ble_rsp_flash_write_data_idx =132,
-	ble_rsp_flash_read_data_idx =133,
-	ble_rsp_attributes_write_idx =134,
-	ble_rsp_attributes_read_idx =135,
-	ble_rsp_attributes_read_type_idx =136,
-	ble_rsp_attributes_user_read_response_idx =137,
-	ble_rsp_attributes_user_write_response_idx =138,
-	ble_rsp_attributes_send_idx =139,
-	ble_rsp_connection_disconnect_idx =140,
-	ble_rsp_connection_get_rssi_idx =141,
-	ble_rsp_connection_update_idx =142,
-	ble_rsp_connection_version_update_idx =143,
-	ble_rsp_connection_channel_map_get_idx =144,
-	ble_rsp_connection_channel_map_set_idx =145,
-	ble_rsp_connection_features_get_idx =146,
-	ble_rsp_connection_get_status_idx =147,
-	ble_rsp_connection_raw_tx_idx =148,
-	ble_rsp_connection_slave_latency_disable_idx =149,
-	ble_rsp_attclient_find_by_type_value_idx =150,
-	ble_rsp_attclient_read_by_group_type_idx =151,
-	ble_rsp_attclient_read_by_type_idx =152,
-	ble_rsp_attclient_find_information_idx =153,
-	ble_rsp_attclient_read_by_handle_idx =154,
-	ble_rsp_attclient_attribute_write_idx =155,
-	ble_rsp_attclient_write_command_idx =156,
-	ble_rsp_attclient_indicate_confirm_idx =157,
-	ble_rsp_attclient_read_long_idx =158,
-	ble_rsp_attclient_prepare_write_idx =159,
-	ble_rsp_attclient_execute_write_idx =160,
-	ble_rsp_attclient_read_multiple_idx =161,
-	ble_rsp_sm_encrypt_start_idx =162,
-	ble_rsp_sm_set_bondable_mode_idx =163,
-	ble_rsp_sm_delete_bonding_idx =164,
-	ble_rsp_sm_set_parameters_idx =165,
-	ble_rsp_sm_passkey_entry_idx =166,
-	ble_rsp_sm_get_bonds_idx =167,
-	ble_rsp_sm_set_oob_data_idx =168,
-	ble_rsp_sm_whitelist_bonds_idx =169,
-	ble_rsp_gap_set_privacy_flags_idx =170,
-	ble_rsp_gap_set_mode_idx =171,
-	ble_rsp_gap_discover_idx =172,
-	ble_rsp_gap_connect_direct_idx =173,
-	ble_rsp_gap_end_procedure_idx =174,
-	ble_rsp_gap_connect_selective_idx =175,
-	ble_rsp_gap_set_filtering_idx =176,
-	ble_rsp_gap_set_scan_parameters_idx =177,
-	ble_rsp_gap_set_adv_parameters_idx =178,
-	ble_rsp_gap_set_adv_data_idx =179,
-	ble_rsp_gap_set_directed_connectable_mode_idx =180,
-	ble_rsp_gap_set_initiating_con_parameters_idx =181,
-	ble_rsp_hardware_io_port_config_irq_idx =182,
-	ble_rsp_hardware_set_soft_timer_idx =183,
-	ble_rsp_hardware_adc_read_idx =184,
-	ble_rsp_hardware_io_port_config_direction_idx =185,
-	ble_rsp_hardware_io_port_config_function_idx =186,
-	ble_rsp_hardware_io_port_config_pull_idx =187,
-	ble_rsp_hardware_io_port_write_idx =188,
-	ble_rsp_hardware_io_port_read_idx =189,
-	ble_rsp_hardware_spi_config_idx =190,
-	ble_rsp_hardware_spi_transfer_idx =191,
-	ble_rsp_hardware_i2c_read_idx =192,
-	ble_rsp_hardware_i2c_write_idx =193,
-	ble_rsp_hardware_set_txpower_idx =194,
-	ble_rsp_hardware_timer_comparator_idx =195,
-	ble_rsp_hardware_io_port_irq_enable_idx =196,
-	ble_rsp_hardware_io_port_irq_direction_idx =197,
-	ble_rsp_hardware_analog_comparator_enable_idx =198,
-	ble_rsp_hardware_analog_comparator_read_idx =199,
-	ble_rsp_hardware_analog_comparator_config_irq_idx =200,
-	ble_rsp_hardware_set_rxgain_idx =201,
-	ble_rsp_hardware_usb_enable_idx =202,
-	ble_rsp_test_phy_tx_idx =203,
-	ble_rsp_test_phy_rx_idx =204,
-	ble_rsp_test_phy_end_idx =205,
-	ble_rsp_test_phy_reset_idx =206,
-	ble_rsp_test_get_channel_map_idx =207,
-	ble_rsp_test_debug_idx =208,
-	ble_rsp_test_channel_mode_idx =209,
-	ble_rsp_dfu_reset_idx =210,
-	ble_rsp_dfu_flash_set_address_idx =211,
-	ble_rsp_dfu_flash_upload_idx =212,
-	ble_rsp_dfu_flash_upload_finish_idx =213,
-	ble_evt_system_boot_idx =214,
-	ble_evt_system_debug_idx =215,
-	ble_evt_system_endpoint_watermark_rx_idx =216,
-	ble_evt_system_endpoint_watermark_tx_idx =217,
-	ble_evt_system_script_failure_idx =218,
-	ble_evt_system_no_license_key_idx =219,
-	ble_evt_system_protocol_error_idx =220,
-	ble_evt_flash_ps_key_idx =221,
-	ble_evt_attributes_value_idx =222,
-	ble_evt_attributes_user_read_request_idx =223,
-	ble_evt_attributes_status_idx =224,
-	ble_evt_connection_status_idx =225,
-	ble_evt_connection_version_ind_idx =226,
-	ble_evt_connection_feature_ind_idx =227,
-	ble_evt_connection_raw_rx_idx =228,
-	ble_evt_connection_disconnected_idx =229,
-	ble_evt_attclient_indicated_idx =230,
-	ble_evt_attclient_procedure_completed_idx =231,
-	ble_evt_attclient_group_found_idx =232,
-	ble_evt_attclient_attribute_found_idx =233,
-	ble_evt_attclient_find_information_found_idx =234,
-	ble_evt_attclient_attribute_value_idx =235,
-	ble_evt_attclient_read_multiple_response_idx =236,
-	ble_evt_sm_smp_data_idx =237,
-	ble_evt_sm_bonding_fail_idx =238,
-	ble_evt_sm_passkey_display_idx =239,
-	ble_evt_sm_passkey_request_idx =240,
-	ble_evt_sm_bond_status_idx =241,
-	ble_evt_gap_scan_response_idx =242,
-	ble_evt_gap_mode_changed_idx =243,
-	ble_evt_hardware_io_port_status_idx =244,
-	ble_evt_hardware_soft_timer_idx =245,
-	ble_evt_hardware_adc_result_idx =246,
-	ble_evt_hardware_analog_comparator_status_idx =247,
-	ble_evt_dfu_boot_idx =248
+	ble_cmd_sm_set_pairing_distribution_keys_idx =63,
+	ble_cmd_gap_set_privacy_flags_idx =64,
+	ble_cmd_gap_set_mode_idx =65,
+	ble_cmd_gap_discover_idx =66,
+	ble_cmd_gap_connect_direct_idx =67,
+	ble_cmd_gap_end_procedure_idx =68,
+	ble_cmd_gap_connect_selective_idx =69,
+	ble_cmd_gap_set_filtering_idx =70,
+	ble_cmd_gap_set_scan_parameters_idx =71,
+	ble_cmd_gap_set_adv_parameters_idx =72,
+	ble_cmd_gap_set_adv_data_idx =73,
+	ble_cmd_gap_set_directed_connectable_mode_idx =74,
+	ble_cmd_gap_set_initiating_con_parameters_idx =75,
+	ble_cmd_gap_set_nonresolvable_address_idx =76,
+	ble_cmd_hardware_io_port_config_irq_idx =77,
+	ble_cmd_hardware_set_soft_timer_idx =78,
+	ble_cmd_hardware_adc_read_idx =79,
+	ble_cmd_hardware_io_port_config_direction_idx =80,
+	ble_cmd_hardware_io_port_config_function_idx =81,
+	ble_cmd_hardware_io_port_config_pull_idx =82,
+	ble_cmd_hardware_io_port_write_idx =83,
+	ble_cmd_hardware_io_port_read_idx =84,
+	ble_cmd_hardware_spi_config_idx =85,
+	ble_cmd_hardware_spi_transfer_idx =86,
+	ble_cmd_hardware_i2c_read_idx =87,
+	ble_cmd_hardware_i2c_write_idx =88,
+	ble_cmd_hardware_set_txpower_idx =89,
+	ble_cmd_hardware_timer_comparator_idx =90,
+	ble_cmd_hardware_io_port_irq_enable_idx =91,
+	ble_cmd_hardware_io_port_irq_direction_idx =92,
+	ble_cmd_hardware_analog_comparator_enable_idx =93,
+	ble_cmd_hardware_analog_comparator_read_idx =94,
+	ble_cmd_hardware_analog_comparator_config_irq_idx =95,
+	ble_cmd_hardware_set_rxgain_idx =96,
+	ble_cmd_hardware_usb_enable_idx =97,
+	ble_cmd_hardware_sleep_enable_idx =98,
+	ble_cmd_test_phy_tx_idx =99,
+	ble_cmd_test_phy_rx_idx =100,
+	ble_cmd_test_phy_end_idx =101,
+	ble_cmd_test_phy_reset_idx =102,
+	ble_cmd_test_get_channel_map_idx =103,
+	ble_cmd_test_debug_idx =104,
+	ble_cmd_test_channel_mode_idx =105,
+	ble_cmd_dfu_reset_idx =106,
+	ble_cmd_dfu_flash_set_address_idx =107,
+	ble_cmd_dfu_flash_upload_idx =108,
+	ble_cmd_dfu_flash_upload_finish_idx =109,
+	ble_rsp_system_reset_idx =110,
+	ble_rsp_system_hello_idx =111,
+	ble_rsp_system_address_get_idx =112,
+	ble_rsp_system_reg_write_idx =113,
+	ble_rsp_system_reg_read_idx =114,
+	ble_rsp_system_get_counters_idx =115,
+	ble_rsp_system_get_connections_idx =116,
+	ble_rsp_system_read_memory_idx =117,
+	ble_rsp_system_get_info_idx =118,
+	ble_rsp_system_endpoint_tx_idx =119,
+	ble_rsp_system_whitelist_append_idx =120,
+	ble_rsp_system_whitelist_remove_idx =121,
+	ble_rsp_system_whitelist_clear_idx =122,
+	ble_rsp_system_endpoint_rx_idx =123,
+	ble_rsp_system_endpoint_set_watermarks_idx =124,
+	ble_rsp_system_aes_setkey_idx =125,
+	ble_rsp_system_aes_encrypt_idx =126,
+	ble_rsp_system_aes_decrypt_idx =127,
+	ble_rsp_flash_ps_defrag_idx =128,
+	ble_rsp_flash_ps_dump_idx =129,
+	ble_rsp_flash_ps_erase_all_idx =130,
+	ble_rsp_flash_ps_save_idx =131,
+	ble_rsp_flash_ps_load_idx =132,
+	ble_rsp_flash_ps_erase_idx =133,
+	ble_rsp_flash_erase_page_idx =134,
+	ble_rsp_flash_write_data_idx =135,
+	ble_rsp_flash_read_data_idx =136,
+	ble_rsp_attributes_write_idx =137,
+	ble_rsp_attributes_read_idx =138,
+	ble_rsp_attributes_read_type_idx =139,
+	ble_rsp_attributes_user_read_response_idx =140,
+	ble_rsp_attributes_user_write_response_idx =141,
+	ble_rsp_attributes_send_idx =142,
+	ble_rsp_connection_disconnect_idx =143,
+	ble_rsp_connection_get_rssi_idx =144,
+	ble_rsp_connection_update_idx =145,
+	ble_rsp_connection_version_update_idx =146,
+	ble_rsp_connection_channel_map_get_idx =147,
+	ble_rsp_connection_channel_map_set_idx =148,
+	ble_rsp_connection_features_get_idx =149,
+	ble_rsp_connection_get_status_idx =150,
+	ble_rsp_connection_raw_tx_idx =151,
+	ble_rsp_connection_slave_latency_disable_idx =152,
+	ble_rsp_attclient_find_by_type_value_idx =153,
+	ble_rsp_attclient_read_by_group_type_idx =154,
+	ble_rsp_attclient_read_by_type_idx =155,
+	ble_rsp_attclient_find_information_idx =156,
+	ble_rsp_attclient_read_by_handle_idx =157,
+	ble_rsp_attclient_attribute_write_idx =158,
+	ble_rsp_attclient_write_command_idx =159,
+	ble_rsp_attclient_indicate_confirm_idx =160,
+	ble_rsp_attclient_read_long_idx =161,
+	ble_rsp_attclient_prepare_write_idx =162,
+	ble_rsp_attclient_execute_write_idx =163,
+	ble_rsp_attclient_read_multiple_idx =164,
+	ble_rsp_sm_encrypt_start_idx =165,
+	ble_rsp_sm_set_bondable_mode_idx =166,
+	ble_rsp_sm_delete_bonding_idx =167,
+	ble_rsp_sm_set_parameters_idx =168,
+	ble_rsp_sm_passkey_entry_idx =169,
+	ble_rsp_sm_get_bonds_idx =170,
+	ble_rsp_sm_set_oob_data_idx =171,
+	ble_rsp_sm_whitelist_bonds_idx =172,
+	ble_rsp_sm_set_pairing_distribution_keys_idx =173,
+	ble_rsp_gap_set_privacy_flags_idx =174,
+	ble_rsp_gap_set_mode_idx =175,
+	ble_rsp_gap_discover_idx =176,
+	ble_rsp_gap_connect_direct_idx =177,
+	ble_rsp_gap_end_procedure_idx =178,
+	ble_rsp_gap_connect_selective_idx =179,
+	ble_rsp_gap_set_filtering_idx =180,
+	ble_rsp_gap_set_scan_parameters_idx =181,
+	ble_rsp_gap_set_adv_parameters_idx =182,
+	ble_rsp_gap_set_adv_data_idx =183,
+	ble_rsp_gap_set_directed_connectable_mode_idx =184,
+	ble_rsp_gap_set_initiating_con_parameters_idx =185,
+	ble_rsp_gap_set_nonresolvable_address_idx =186,
+	ble_rsp_hardware_io_port_config_irq_idx =187,
+	ble_rsp_hardware_set_soft_timer_idx =188,
+	ble_rsp_hardware_adc_read_idx =189,
+	ble_rsp_hardware_io_port_config_direction_idx =190,
+	ble_rsp_hardware_io_port_config_function_idx =191,
+	ble_rsp_hardware_io_port_config_pull_idx =192,
+	ble_rsp_hardware_io_port_write_idx =193,
+	ble_rsp_hardware_io_port_read_idx =194,
+	ble_rsp_hardware_spi_config_idx =195,
+	ble_rsp_hardware_spi_transfer_idx =196,
+	ble_rsp_hardware_i2c_read_idx =197,
+	ble_rsp_hardware_i2c_write_idx =198,
+	ble_rsp_hardware_set_txpower_idx =199,
+	ble_rsp_hardware_timer_comparator_idx =200,
+	ble_rsp_hardware_io_port_irq_enable_idx =201,
+	ble_rsp_hardware_io_port_irq_direction_idx =202,
+	ble_rsp_hardware_analog_comparator_enable_idx =203,
+	ble_rsp_hardware_analog_comparator_read_idx =204,
+	ble_rsp_hardware_analog_comparator_config_irq_idx =205,
+	ble_rsp_hardware_set_rxgain_idx =206,
+	ble_rsp_hardware_usb_enable_idx =207,
+	ble_rsp_hardware_sleep_enable_idx =208,
+	ble_rsp_test_phy_tx_idx =209,
+	ble_rsp_test_phy_rx_idx =210,
+	ble_rsp_test_phy_end_idx =211,
+	ble_rsp_test_phy_reset_idx =212,
+	ble_rsp_test_get_channel_map_idx =213,
+	ble_rsp_test_debug_idx =214,
+	ble_rsp_test_channel_mode_idx =215,
+	ble_rsp_dfu_reset_idx =216,
+	ble_rsp_dfu_flash_set_address_idx =217,
+	ble_rsp_dfu_flash_upload_idx =218,
+	ble_rsp_dfu_flash_upload_finish_idx =219,
+	ble_evt_system_boot_idx =220,
+	ble_evt_system_debug_idx =221,
+	ble_evt_system_endpoint_watermark_rx_idx =222,
+	ble_evt_system_endpoint_watermark_tx_idx =223,
+	ble_evt_system_script_failure_idx =224,
+	ble_evt_system_no_license_key_idx =225,
+	ble_evt_system_protocol_error_idx =226,
+	ble_evt_flash_ps_key_idx =227,
+	ble_evt_attributes_value_idx =228,
+	ble_evt_attributes_user_read_request_idx =229,
+	ble_evt_attributes_status_idx =230,
+	ble_evt_connection_status_idx =231,
+	ble_evt_connection_version_ind_idx =232,
+	ble_evt_connection_feature_ind_idx =233,
+	ble_evt_connection_raw_rx_idx =234,
+	ble_evt_connection_disconnected_idx =235,
+	ble_evt_attclient_indicated_idx =236,
+	ble_evt_attclient_procedure_completed_idx =237,
+	ble_evt_attclient_group_found_idx =238,
+	ble_evt_attclient_attribute_found_idx =239,
+	ble_evt_attclient_find_information_found_idx =240,
+	ble_evt_attclient_attribute_value_idx =241,
+	ble_evt_attclient_read_multiple_response_idx =242,
+	ble_evt_sm_smp_data_idx =243,
+	ble_evt_sm_bonding_fail_idx =244,
+	ble_evt_sm_passkey_display_idx =245,
+	ble_evt_sm_passkey_request_idx =246,
+	ble_evt_sm_bond_status_idx =247,
+	ble_evt_gap_scan_response_idx =248,
+	ble_evt_gap_mode_changed_idx =249,
+	ble_evt_hardware_io_port_status_idx =250,
+	ble_evt_hardware_soft_timer_idx =251,
+	ble_evt_hardware_adc_result_idx =252,
+	ble_evt_hardware_analog_comparator_status_idx =253,
+	ble_evt_dfu_boot_idx =254
 };
 #ifndef BG_ERRORCODES
 #define BG_ERRORCODES
@@ -1617,6 +1629,17 @@ PACKSTRUCT(struct ble_msg_sm_whitelist_bonds_rsp_t
 	uint8	count;
 });
 
+PACKSTRUCT(struct ble_msg_sm_set_pairing_distribution_keys_cmd_t
+{
+	uint8	initiator_keys;
+	uint8	responder_keys;
+});
+
+PACKSTRUCT(struct ble_msg_sm_set_pairing_distribution_keys_rsp_t
+{
+	uint16	result;
+});
+
 PACKSTRUCT(struct ble_msg_sm_smp_data_evt_t
 {
 	uint8	handle;
@@ -1776,6 +1799,16 @@ PACKSTRUCT(struct ble_msg_gap_set_initiating_con_parameters_cmd_t
 });
 
 PACKSTRUCT(struct ble_msg_gap_set_initiating_con_parameters_rsp_t
+{
+	uint16	result;
+});
+
+PACKSTRUCT(struct ble_msg_gap_set_nonresolvable_address_cmd_t
+{
+	bd_addr	address;
+});
+
+PACKSTRUCT(struct ble_msg_gap_set_nonresolvable_address_rsp_t
 {
 	uint16	result;
 });
@@ -2020,6 +2053,16 @@ PACKSTRUCT(struct ble_msg_hardware_usb_enable_rsp_t
 	uint16	result;
 });
 
+PACKSTRUCT(struct ble_msg_hardware_sleep_enable_cmd_t
+{
+	uint8	enable;
+});
+
+PACKSTRUCT(struct ble_msg_hardware_sleep_enable_rsp_t
+{
+	uint16	result;
+});
+
 PACKSTRUCT(struct ble_msg_hardware_io_port_status_evt_t
 {
 	uint32	timestamp;
@@ -2126,8 +2169,6 @@ struct ble_cmd_packet
 
 union{
 	uint8 handle;
-
-	uint8 payload;
 
 	struct ble_msg_system_reset_cmd_t                          system_reset_cmd;
 	struct ble_msg_system_reg_write_cmd_t                      system_reg_write_cmd;
@@ -2248,6 +2289,7 @@ union{
 	struct ble_msg_sm_set_parameters_cmd_t                     sm_set_parameters_cmd;
 	struct ble_msg_sm_passkey_entry_cmd_t                      sm_passkey_entry_cmd;
 	struct ble_msg_sm_set_oob_data_cmd_t                       sm_set_oob_data_cmd;
+	struct ble_msg_sm_set_pairing_distribution_keys_cmd_t      sm_set_pairing_distribution_keys_cmd;
 	struct ble_msg_sm_smp_data_evt_t                           sm_smp_data_evt;
 	struct ble_msg_sm_bonding_fail_evt_t                       sm_bonding_fail_evt;
 	struct ble_msg_sm_passkey_display_evt_t                    sm_passkey_display_evt;
@@ -2258,6 +2300,7 @@ union{
 	struct ble_msg_sm_passkey_entry_rsp_t                      sm_passkey_entry_rsp;
 	struct ble_msg_sm_get_bonds_rsp_t                          sm_get_bonds_rsp;
 	struct ble_msg_sm_whitelist_bonds_rsp_t                    sm_whitelist_bonds_rsp;
+	struct ble_msg_sm_set_pairing_distribution_keys_rsp_t      sm_set_pairing_distribution_keys_rsp;
 	struct ble_msg_gap_set_privacy_flags_cmd_t                 gap_set_privacy_flags_cmd;
 	struct ble_msg_gap_set_mode_cmd_t                          gap_set_mode_cmd;
 	struct ble_msg_gap_discover_cmd_t                          gap_discover_cmd;
@@ -2269,6 +2312,7 @@ union{
 	struct ble_msg_gap_set_adv_data_cmd_t                      gap_set_adv_data_cmd;
 	struct ble_msg_gap_set_directed_connectable_mode_cmd_t     gap_set_directed_connectable_mode_cmd;
 	struct ble_msg_gap_set_initiating_con_parameters_cmd_t     gap_set_initiating_con_parameters_cmd;
+	struct ble_msg_gap_set_nonresolvable_address_cmd_t         gap_set_nonresolvable_address_cmd;
 	struct ble_msg_gap_scan_response_evt_t                     gap_scan_response_evt;
 	struct ble_msg_gap_mode_changed_evt_t                      gap_mode_changed_evt;
 	struct ble_msg_gap_set_mode_rsp_t                          gap_set_mode_rsp;
@@ -2282,6 +2326,7 @@ union{
 	struct ble_msg_gap_set_adv_data_rsp_t                      gap_set_adv_data_rsp;
 	struct ble_msg_gap_set_directed_connectable_mode_rsp_t     gap_set_directed_connectable_mode_rsp;
 	struct ble_msg_gap_set_initiating_con_parameters_rsp_t     gap_set_initiating_con_parameters_rsp;
+	struct ble_msg_gap_set_nonresolvable_address_rsp_t         gap_set_nonresolvable_address_rsp;
 	struct ble_msg_hardware_io_port_config_irq_cmd_t           hardware_io_port_config_irq_cmd;
 	struct ble_msg_hardware_set_soft_timer_cmd_t               hardware_set_soft_timer_cmd;
 	struct ble_msg_hardware_adc_read_cmd_t                     hardware_adc_read_cmd;
@@ -2302,6 +2347,7 @@ union{
 	struct ble_msg_hardware_analog_comparator_config_irq_cmd_t hardware_analog_comparator_config_irq_cmd;
 	struct ble_msg_hardware_set_rxgain_cmd_t                   hardware_set_rxgain_cmd;
 	struct ble_msg_hardware_usb_enable_cmd_t                   hardware_usb_enable_cmd;
+	struct ble_msg_hardware_sleep_enable_cmd_t                 hardware_sleep_enable_cmd;
 	struct ble_msg_hardware_io_port_status_evt_t               hardware_io_port_status_evt;
 	struct ble_msg_hardware_soft_timer_evt_t                   hardware_soft_timer_evt;
 	struct ble_msg_hardware_adc_result_evt_t                   hardware_adc_result_evt;
@@ -2324,6 +2370,7 @@ union{
 	struct ble_msg_hardware_analog_comparator_read_rsp_t       hardware_analog_comparator_read_rsp;
 	struct ble_msg_hardware_analog_comparator_config_irq_rsp_t hardware_analog_comparator_config_irq_rsp;
 	struct ble_msg_hardware_usb_enable_rsp_t                   hardware_usb_enable_rsp;
+	struct ble_msg_hardware_sleep_enable_rsp_t                 hardware_sleep_enable_rsp;
 	struct ble_msg_test_phy_tx_cmd_t                           test_phy_tx_cmd;
 	struct ble_msg_test_phy_rx_cmd_t                           test_phy_rx_cmd;
 	struct ble_msg_test_debug_cmd_t                            test_debug_cmd;
@@ -2338,6 +2385,8 @@ union{
 	struct ble_msg_dfu_flash_set_address_rsp_t                 dfu_flash_set_address_rsp;
 	struct ble_msg_dfu_flash_upload_rsp_t                      dfu_flash_upload_rsp;
 	struct ble_msg_dfu_flash_upload_finish_rsp_t               dfu_flash_upload_finish_rsp;
+
+	uint8 payload[128];/*TODO: fix this for getting command size larger*/
 };
 
 }ALIGNED);
@@ -2475,6 +2524,10 @@ union{
 				or being connected.
 			**/
 #define ble_cmd_sm_whitelist_bonds() ble_send_message (ble_cmd_sm_whitelist_bonds_idx)
+/**
+				Change keys distribution fields in pairing request and response. By default all keys are distributed.
+			**/
+#define ble_cmd_sm_set_pairing_distribution_keys(initiator_keys,responder_keys) ble_send_message (ble_cmd_sm_set_pairing_distribution_keys_idx,initiator_keys,responder_keys)
 /**Set GAP central/peripheral privacy flags	
 			**/
 #define ble_cmd_gap_set_privacy_flags(peripheral_privacy,central_privacy) ble_send_message (ble_cmd_gap_set_privacy_flags_idx,peripheral_privacy,central_privacy)
@@ -2504,6 +2557,8 @@ union{
 #define ble_cmd_gap_set_directed_connectable_mode(address,addr_type) ble_send_message (ble_cmd_gap_set_directed_connectable_mode_idx,address,addr_type)
 /**Set Initiating connection scan parameters**/
 #define ble_cmd_gap_set_initiating_con_parameters(scan_interval,scan_window) ble_send_message (ble_cmd_gap_set_initiating_con_parameters_idx,scan_interval,scan_window)
+/**Set non-resolvable address**/
+#define ble_cmd_gap_set_nonresolvable_address(address) ble_send_message (ble_cmd_gap_set_nonresolvable_address_idx,address)
 /**Configure I/O-port interrupts**/
 #define ble_cmd_hardware_io_port_config_irq(port,enable_bits,falling_edge) ble_send_message (ble_cmd_hardware_io_port_config_irq_idx,port,enable_bits,falling_edge)
 /**Set soft timer to send events**/
@@ -2546,6 +2601,8 @@ union{
 #define ble_cmd_hardware_set_rxgain(gain) ble_send_message (ble_cmd_hardware_set_rxgain_idx,gain)
 /**Enable or disable USB**/
 #define ble_cmd_hardware_usb_enable(enable) ble_send_message (ble_cmd_hardware_usb_enable_idx,enable)
+/**Enable or disable sleep mode**/
+#define ble_cmd_hardware_sleep_enable(enable) ble_send_message (ble_cmd_hardware_sleep_enable_idx,enable)
 /**Start packet transmission, send one packet at every 625us**/
 #define ble_cmd_test_phy_tx(channel,length,type) ble_send_message (ble_cmd_test_phy_tx_idx,channel,length,type)
 /**Start receive test**/
@@ -2765,6 +2822,11 @@ void ble_rsp_sm_set_oob_data(const void *nul);
 			**/
 void ble_rsp_sm_whitelist_bonds(const struct ble_msg_sm_whitelist_bonds_rsp_t *msg);
 
+/**
+				Change keys distribution fields in pairing request and response. By default all keys are distributed.
+			**/
+void ble_rsp_sm_set_pairing_distribution_keys(const struct ble_msg_sm_set_pairing_distribution_keys_rsp_t *msg);
+
 /**Set GAP central/peripheral privacy flags	
 			**/
 void ble_rsp_gap_set_privacy_flags(const void *nul);
@@ -2805,6 +2867,9 @@ void ble_rsp_gap_set_directed_connectable_mode(const struct ble_msg_gap_set_dire
 
 /**Set Initiating connection scan parameters**/
 void ble_rsp_gap_set_initiating_con_parameters(const struct ble_msg_gap_set_initiating_con_parameters_rsp_t *msg);
+
+/**Set non-resolvable address**/
+void ble_rsp_gap_set_nonresolvable_address(const struct ble_msg_gap_set_nonresolvable_address_rsp_t *msg);
 
 /**Configure I/O-port interrupts**/
 void ble_rsp_hardware_io_port_config_irq(const struct ble_msg_hardware_io_port_config_irq_rsp_t *msg);
@@ -2868,6 +2933,9 @@ void ble_rsp_hardware_set_rxgain(const void *nul);
 
 /**Enable or disable USB**/
 void ble_rsp_hardware_usb_enable(const struct ble_msg_hardware_usb_enable_rsp_t *msg);
+
+/**Enable or disable sleep mode**/
+void ble_rsp_hardware_sleep_enable(const struct ble_msg_hardware_sleep_enable_rsp_t *msg);
 
 /**Start packet transmission, send one packet at every 625us**/
 void ble_rsp_test_phy_tx(const void *nul);

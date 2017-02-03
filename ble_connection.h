@@ -27,6 +27,7 @@ Q_DECLARE_METATYPE(ble_message)
 static bool messageCaptured;
 static ble_message message;
 static int found_devices_count;
+static bool connected;
 
 class BLE_Connection : public QObject
 {

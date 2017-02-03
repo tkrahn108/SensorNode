@@ -22,6 +22,12 @@ BLE_Connection::BLE_Connection(QObject *parent) :
                                 0,
                                 NULL);
 
+    COMMTIMEOUTS cto;
+    // Set the new timeouts
+    cto.ReadIntervalTimeout = MAXDWORD;
+    cto.ReadTotalTimeoutConstant = 0;
+    cto.ReadTotalTimeoutMultiplier = 0;
+    SetCommTimeouts(serial_handle,&cto);
 
     if (serial_handle == INVALID_HANDLE_VALUE)
     {
@@ -29,8 +35,11 @@ BLE_Connection::BLE_Connection(QObject *parent) :
         snprintf(buff, sizeof(buff), "Error opening serialport %s. %d\n","COM3",(int)GetLastError());
     }
 
+
+
     bglib_output = output;
 
+    connected = false;
     messageCaptured = false;
     found_devices_count = 0;
 
@@ -42,7 +51,9 @@ BLE_Connection::BLE_Connection(QObject *parent) :
 
 void BLE_Connection::requestMethod(BLE_Connection::Method method)
 {
-    qDebug()<<"Request worker Method"<<method<<"in Thread "<<thread()->currentThreadId();
+    if(method != DoNothing){
+        qDebug()<<"Request worker Method"<<method<<"in Thread "<<thread()->currentThreadId();
+    }
     QMutexLocker locker(&mutex);
     _method = method;
 
@@ -96,8 +107,7 @@ void BLE_Connection::doScan()
 
         requestMethod(DoNothing);
 
-        int readed = read_message();
-        qDebug() << "ReadMessage: " << readed;
+        read_message();
     }
 }
 
@@ -135,7 +145,6 @@ int BLE_Connection::read_message()
     struct ble_header apihdr;
     unsigned char data[256];//enough for BLE
     //read header
-    qDebug() << "I'm here, first";
     if(!ReadFile(serial_handle,
                  (unsigned char*)&apihdr,
                  4,
@@ -144,7 +153,6 @@ int BLE_Connection::read_message()
     {
         return GetLastError();
     }
-     qDebug() << "I'm here, second";
     if(!rread)return 0;
     //read rest if needed
     if(apihdr.lolen)
@@ -158,7 +166,6 @@ int BLE_Connection::read_message()
             return GetLastError();
         }
     }
-    qDebug() << "I'm here, third";
     apimsg=ble_get_msg_hdr(apihdr);
     if(!apimsg)
     {
@@ -166,7 +173,6 @@ int BLE_Connection::read_message()
         return -1;
     }
     apimsg->handler(data);
-    qDebug() << "I'm here, fourth";
     return 0;
 }
 
@@ -232,6 +238,7 @@ void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg
         messageCaptured = true;
         connection_handle = msg->connection;
         found_devices_count++;
+        connected = true;
         qDebug() << "Added Device: " << found_devices_count;
         qDebug() << "Connection Handle: " << connection_handle;
     }else
@@ -245,17 +252,18 @@ void ble_evt_connection_disconnected(const struct ble_msg_connection_disconnecte
 {
     ble_cmd_connection_get_status(0);
     found_devices_count--;
+    connected = false;
     qDebug() << "Removed Device: " << found_devices_count;
 }
 
 void ble_rsp_connection_disconnect(const struct ble_msg_connection_disconnect_rsp_t * msg)
 {
-                                       if(msg->result == 0){
-                                           qDebug() << "Connection handle " << msg->connection << ": Disconnection procedure successfully started. ";
-                                       } else {
-                                           qDebug() << "Connection handle " << msg->connection << "Disconnection procedure failed. " << msg->result;
-                                       }
-                                   }
+    if(msg->result == 0){
+        qDebug() << "Connection handle " << msg->connection << ": Disconnection procedure successfully started. ";
+    } else {
+        qDebug() << "Connection handle " << msg->connection << "Disconnection procedure failed. " << msg->result;
+    }
+}
 
 void ble_rsp_gap_discover(const struct ble_msg_gap_discover_rsp_t *msg)
 {

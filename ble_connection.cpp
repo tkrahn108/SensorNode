@@ -100,7 +100,16 @@ void BLE_Connection::doScan()
         case PrimaryServiceDiscovery:
             primaryServiceDiscovery();
             break;
-         default:
+        case CharacterisiticDiscovery:
+            characterisiticDiscovery();
+            break;
+        case DescriptorsDiscovery:
+            descriptorsDiscovery();
+            break;
+        case ReadValueByHandle:
+            readValueByHandle();
+            break;
+        default:
             qDebug() << "Default in switch case";
             break;
         }
@@ -197,6 +206,22 @@ void BLE_Connection::primaryServiceDiscovery()
     ble_cmd_attclient_read_by_group_type(connection_handle, 0x0001, 0xFFFF, uuid_len, primary_service_uuid);
 }
 
+void BLE_Connection::characterisiticDiscovery()
+{
+    uint8 uuid[] = {0x03, 0x28};
+    ble_cmd_attclient_read_by_type(connection_handle, 0x000c, 0xFFFF, sizeof(uuid), uuid);
+}
+
+void BLE_Connection::descriptorsDiscovery()
+{
+    ble_cmd_attclient_find_information(connection_handle, 0x0001, 0xFFFF);
+}
+
+void BLE_Connection::readValueByHandle()
+{
+    ble_cmd_attclient_read_by_handle(connection_handle, 0x000e);
+}
+
 //=============FUNCTIONS FOR HANDELING EVENTS AND RESPONSES====================
 
 
@@ -286,5 +311,20 @@ void ble_rsp_gap_connect_direct(const ble_msg_gap_connect_direct_rsp_t *msg)
 void ble_evt_attclient_group_found(const struct ble_msg_attclient_group_found_evt_t * msg)
 {
     message.name = "ble_evt_attclient_group_found";
+    messageCaptured = true;
+}
+
+void ble_evt_attclient_find_information_found(const ble_msg_attclient_find_information_found_evt_t *msg)
+{
+    message.name = std::string(msg->uuid.data, msg->uuid.data+msg->uuid.len);
+    qDebug() << "Uuid->data: " << msg->uuid.data << " Uuid.len: " << msg->uuid.len;
+    messageCaptured = true;
+}
+
+void ble_evt_attclient_attribute_value(const ble_msg_attclient_attribute_value_evt_t *msg)
+{
+    int32_t value = (msg->value.data[3] << 24) |(msg->value.data[2] << 16) |(msg->value.data[1] << 8) | msg->value.data[0];
+    message.name = std::to_string(value);
+    qDebug() << "Value: " << value;
     messageCaptured = true;
 }

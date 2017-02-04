@@ -48,7 +48,10 @@ public:
         DoNothing = 0,
         Connect = 1,
         Disconnect = 2,
-        PrimaryServiceDiscovery = 3
+        PrimaryServiceDiscovery = 3,
+        CharacterisiticDiscovery = 4,
+        DescriptorsDiscovery = 5,
+        ReadValueByHandle = 6
     };
 
     /**
@@ -69,8 +72,11 @@ private:
     QMutex mutex;
 
     void primaryServiceDiscovery();
+    void characterisiticDiscovery();
+    void descriptorsDiscovery();
     void connect();
     void disconnect();
+    void readValueByHandle();
 
 signals:
     void scanRequested();

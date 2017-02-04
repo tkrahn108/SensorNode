@@ -35,6 +35,8 @@ private slots:
 
     void on_pushButtonDescriptorDiscover_clicked();
 
+    void on_pushButtonRead_clicked();
+
 private:
     Ui::SensorNode_GUI *ui;
     QThread *thread;

@@ -640,13 +640,13 @@ void ble_evt_attclient_attribute_found(const struct ble_msg_attclient_attribute_
 {
 }
 
-void ble_evt_attclient_find_information_found(const struct ble_msg_attclient_find_information_found_evt_t *msg)
-{
-}
+//void ble_evt_attclient_find_information_found(const struct ble_msg_attclient_find_information_found_evt_t *msg)
+//{
+//}
 
-void ble_evt_attclient_attribute_value(const struct ble_msg_attclient_attribute_value_evt_t *msg)
-{
-}
+//void ble_evt_attclient_attribute_value(const struct ble_msg_attclient_attribute_value_evt_t *msg)
+//{
+//}
 
 void ble_evt_sm_smp_data(const struct ble_msg_sm_smp_data_evt_t *msg)
 {

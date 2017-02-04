@@ -66,6 +66,7 @@ void SensorNode_GUI::on_pushButtonDisconnect_clicked()
 void SensorNode_GUI::setNewMessage(ble_message msg)
 {
     ui->textEdit->append(QString::fromStdString(msg.name));
+
 }
 
 void SensorNode_GUI::on_pushButtonServiceDiscover_clicked()
@@ -75,10 +76,15 @@ void SensorNode_GUI::on_pushButtonServiceDiscover_clicked()
 
 void SensorNode_GUI::on_pushButtonCharacterisitcDiscover_clicked()
 {
-
+    ble_worker->requestMethod(BLE_Connection::CharacterisiticDiscovery);
 }
 
 void SensorNode_GUI::on_pushButtonDescriptorDiscover_clicked()
 {
+    ble_worker->requestMethod(BLE_Connection::DescriptorsDiscovery);
+}
 
+void SensorNode_GUI::on_pushButtonRead_clicked()
+{
+    ble_worker->requestMethod(BLE_Connection::ReadValueByHandle);
 }

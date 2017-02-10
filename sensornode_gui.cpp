@@ -13,6 +13,9 @@ SensorNode_GUI::SensorNode_GUI(QWidget *parent) :
 
     thread = new QThread();
     ble_worker = new BLE_Connection();
+    if(ble_worker->init() != 0){
+        printText("Error opening serialport!");
+    }
 
     ble_worker->moveToThread(thread);
 
@@ -65,8 +68,13 @@ void SensorNode_GUI::on_pushButtonDisconnect_clicked()
 
 void SensorNode_GUI::setNewMessage(ble_message msg)
 {
-    ui->textEdit->append(QString::fromStdString(msg.name));
-
+    std::string s = msg.name;
+    if(msg.rssi != NULL){
+        s += '\t';
+        s += std::to_string(msg.rssi);
+        s += " dBm";
+    }
+    ui->textEdit->append(QString::fromStdString(s));
 }
 
 void SensorNode_GUI::on_pushButtonServiceDiscover_clicked()

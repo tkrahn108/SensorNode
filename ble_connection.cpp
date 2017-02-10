@@ -1,7 +1,7 @@
 #include "ble_connection.h"
 
 volatile HANDLE serial_handle;
-#define MAX_DEVICES 64
+#define MAX_DEVICES 8
 
 bd_addr found_devices[MAX_DEVICES];
 uint8 primary_service_uuid[] = {0x00, 0x28};
@@ -9,6 +9,11 @@ uint8 connection_handle;
 
 BLE_Connection::BLE_Connection(QObject *parent) :
     QObject(parent)
+{
+
+}
+
+int BLE_Connection::init()
 {
     char str[80];
     //TODO getting serialport from GUI
@@ -33,20 +38,21 @@ BLE_Connection::BLE_Connection(QObject *parent) :
     {
         char buff[100];
         snprintf(buff, sizeof(buff), "Error opening serialport %s. %d\n","COM3",(int)GetLastError());
+        return -1;
+    } else {
+        bglib_output = output;
+
+        connected = false;
+        messageCaptured = false;
+        found_devices_count = 0;
+
+        //stop previous operation
+        ble_cmd_gap_end_procedure();
+        //get connection status,current command will be handled in response
+        ble_cmd_connection_get_status(0);
+
+        return 0;
     }
-
-
-
-    bglib_output = output;
-
-    connected = false;
-    messageCaptured = false;
-    found_devices_count = 0;
-
-    //stop previous operation
-    ble_cmd_gap_end_procedure();
-    //get connection status,current command will be handled in response
-    ble_cmd_connection_get_status(0);
 }
 
 void BLE_Connection::requestMethod(BLE_Connection::Method method)
@@ -82,6 +88,8 @@ void BLE_Connection::doScan()
         if( messageCaptured ){
             emit valueChanged(message);
             messageCaptured = false;
+            message.name = "";
+            message.rssi = NULL;
         }
 
         mutex.lock();

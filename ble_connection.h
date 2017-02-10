@@ -38,6 +38,7 @@ public:
     static void output(uint8,uint8*,uint16,uint8*);
     int read_message();
 
+    int init();
     void requestScan();
     void abort();
 

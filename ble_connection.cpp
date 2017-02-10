@@ -311,12 +311,17 @@ void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg
         messageCaptured = true;
 
         // Check if this device already found
-        int i;
-        for (i = 0; i < connected_devices_count; i++) {
-            if (!cmp_bdaddr(msg->address, connected_devices[i])) return;
-        }
+//        int i;
+//        for (i = 0; i < connected_devices_count; i++) {
+//            if (!cmp_bdaddr(msg->address, connected_devices[i])) return;
+//        }
         connected_devices_count++;
-        memcpy(connected_devices[i].addr, msg->address.addr, sizeof(bd_addr));
+        memcpy(connected_devices[msg->connection].addr, msg->address.addr, sizeof(bd_addr));
+
+        qDebug() << "Connected:";
+        for(int j = 0; j < MAX_DEVICES-1; j++){
+            print_bdaddr(connected_devices[j]);
+        }
 
         connection_handle = msg->connection;
         qDebug() << "Added Device: " << connected_devices_count;
@@ -332,11 +337,13 @@ void ble_evt_connection_disconnected(const struct ble_msg_connection_disconnecte
     ble_cmd_connection_get_status(0);
 
     connected_devices_count--;
+    uint8 addr[6] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    memcpy(connected_devices[msg->connection].addr, addr, sizeof(bd_addr));
 
-//    qDebug() << "Remove:";
-//    for(int j = 0; j < MAX_DEVICES-1; j++){
-//        print_bdaddr(connected_devices[j]);
-//    }
+    qDebug() << "Disconnected:";
+    for(int j = 0; j < MAX_DEVICES-1; j++){
+        print_bdaddr(connected_devices[j]);
+    }
 
     qDebug() << "Removed Device: " << connected_devices_count;
 }

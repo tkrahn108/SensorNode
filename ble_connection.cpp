@@ -3,7 +3,7 @@
 volatile HANDLE serial_handle;
 #define MAX_DEVICES 8
 
-bd_addr found_devices[MAX_DEVICES];
+bd_addr connected_devices[MAX_DEVICES];
 uint8 primary_service_uuid[] = {0x00, 0x28};
 uint8 connection_handle;
 
@@ -42,9 +42,8 @@ int BLE_Connection::init()
     } else {
         bglib_output = output;
 
-        connected = false;
         messageCaptured = false;
-        found_devices_count = 0;
+        connected_devices_count = 0;
 
         //stop previous operation
         ble_cmd_gap_end_procedure();
@@ -63,6 +62,41 @@ void BLE_Connection::requestMethod(BLE_Connection::Method method)
     QMutexLocker locker(&mutex);
     _method = method;
 
+}
+
+void BLE_Connection::setAddr(bd_addr addr)
+{
+    _addr = addr;
+}
+
+/**
+ * Compare Bluetooth addresses
+ *
+ * @param first First address
+ * @param second Second address
+ * @return Zero if addresses are equal
+ */
+int cmp_bdaddr(bd_addr first, bd_addr second)
+{
+    int i;
+    for (i = 0; i < sizeof(bd_addr); i++) {
+        if (first.addr[i] != second.addr[i]) return 1;
+    }
+    return 0;
+}
+
+void print_bdaddr(bd_addr bdaddr)
+{
+    char str[20];
+    snprintf(str, sizeof(str)-1, "%02x:%02x:%02x:%02x:%02x:%02x",
+            bdaddr.addr[5],
+            bdaddr.addr[4],
+            bdaddr.addr[3],
+            bdaddr.addr[2],
+            bdaddr.addr[1],
+            bdaddr.addr[0]);
+
+    qDebug() << str;
 }
 
 void BLE_Connection::requestScan()
@@ -195,8 +229,15 @@ int BLE_Connection::read_message()
 
 void BLE_Connection::connect()
 {
-    uint8 addr[6] = {0xe6, 0x27, 0x6b, 0xc2, 0x37, 0xe0};
-    ble_cmd_gap_connect_direct(addr, 1, 50, 3200, 400, 0);
+    qDebug() << "Before:";
+    for(int j = 0; j < MAX_DEVICES-1; j++){
+        print_bdaddr(connected_devices[j]);
+    }
+
+    mutex.lock();
+    bd_addr temp = _addr;
+    mutex.unlock();
+    ble_cmd_gap_connect_direct(temp.addr, 1, 50, 3200, 400, 0);
 }
 
 void BLE_Connection::disconnect()
@@ -266,17 +307,22 @@ void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg
 {
     if(msg->flags&connection_completed)
     {
-        //        gui->printText("Connection established");
         message.name = "New connection established";
         messageCaptured = true;
+
+        // Check if this device already found
+        int i;
+        for (i = 0; i < connected_devices_count; i++) {
+            if (!cmp_bdaddr(msg->address, connected_devices[i])) return;
+        }
+        connected_devices_count++;
+        memcpy(connected_devices[i].addr, msg->address.addr, sizeof(bd_addr));
+
         connection_handle = msg->connection;
-        found_devices_count++;
-        connected = true;
-        qDebug() << "Added Device: " << found_devices_count;
+        qDebug() << "Added Device: " << connected_devices_count;
         qDebug() << "Connection Handle: " << connection_handle;
     }else
     {
-        //        gui->printText("#Not connected -> Scan");
         ble_cmd_gap_discover(1);
     }
 }
@@ -284,9 +330,15 @@ void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg
 void ble_evt_connection_disconnected(const struct ble_msg_connection_disconnected_evt_t *msg)
 {
     ble_cmd_connection_get_status(0);
-    found_devices_count--;
-    connected = false;
-    qDebug() << "Removed Device: " << found_devices_count;
+
+    connected_devices_count--;
+
+//    qDebug() << "Remove:";
+//    for(int j = 0; j < MAX_DEVICES-1; j++){
+//        print_bdaddr(connected_devices[j]);
+//    }
+
+    qDebug() << "Removed Device: " << connected_devices_count;
 }
 
 void ble_rsp_connection_disconnect(const struct ble_msg_connection_disconnect_rsp_t * msg)

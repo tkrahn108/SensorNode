@@ -58,6 +58,8 @@ void SensorNode_GUI::on_pushButtonStopScanning_clicked()
 
 void SensorNode_GUI::on_pushButtonConnect_clicked()
 {
+    bd_addr addr = {{0xe6, 0x27, 0x6b, 0xc2, 0x37, 0xe0}};
+    ble_worker->setAddr(addr);
     ble_worker->requestMethod(BLE_Connection::Connect);
 }
 

@@ -26,8 +26,11 @@ Q_DECLARE_METATYPE(ble_message)
 
 static bool messageCaptured;
 static ble_message message;
-static int found_devices_count;
-static bool connected;
+static int connected_devices_count;
+
+int cmp_bdaddr(bd_addr first, bd_addr second);
+void print_bdaddr(bd_addr bdaddr);
+
 
 class BLE_Connection : public QObject
 {
@@ -63,11 +66,14 @@ public:
      */
     void requestMethod(Method method);
 
+    void setAddr(bd_addr addr);
+
 private:
     /**
      * @brief Currently requested method
      */
     Method _method;
+    bd_addr _addr;
 
     bool _abort;
     QMutex mutex;
@@ -78,6 +84,7 @@ private:
     void connect();
     void disconnect();
     void readValueByHandle();
+
 
 signals:
     void scanRequested();

@@ -31,7 +31,6 @@ static int connected_devices_count;
 int cmp_bdaddr(bd_addr first, bd_addr second);
 void print_bdaddr(bd_addr bdaddr);
 
-
 class BLE_Connection : public QObject
 {
     Q_OBJECT
@@ -55,7 +54,9 @@ public:
         PrimaryServiceDiscovery = 3,
         CharacterisiticDiscovery = 4,
         DescriptorsDiscovery = 5,
-        ReadValueByHandle = 6
+        ReadValueByHandle = 6,
+        NotificationOn = 7,
+        NotificationOff = 8
     };
 
     /**
@@ -84,7 +85,9 @@ private:
     void connect();
     void disconnect();
     void readValueByHandle();
-
+    void notificationOn();
+    void notificationOff();
+    int getConnectionHandle(bd_addr adr);
 
 signals:
     void scanRequested();

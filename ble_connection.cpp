@@ -66,38 +66,11 @@ void BLE_Connection::requestMethod(BLE_Connection::Method method)
 
 void BLE_Connection::setAddr(bd_addr addr)
 {
+    mutex.lock();
     _addr = addr;
+    mutex.unlock();
 }
 
-/**
- * Compare Bluetooth addresses
- *
- * @param first First address
- * @param second Second address
- * @return Zero if addresses are equal
- */
-int cmp_bdaddr(bd_addr first, bd_addr second)
-{
-    int i;
-    for (i = 0; i < sizeof(bd_addr); i++) {
-        if (first.addr[i] != second.addr[i]) return 1;
-    }
-    return 0;
-}
-
-void print_bdaddr(bd_addr bdaddr)
-{
-    char str[20];
-    snprintf(str, sizeof(str)-1, "%02x:%02x:%02x:%02x:%02x:%02x",
-            bdaddr.addr[5],
-            bdaddr.addr[4],
-            bdaddr.addr[3],
-            bdaddr.addr[2],
-            bdaddr.addr[1],
-            bdaddr.addr[0]);
-
-    qDebug() << str;
-}
 
 void BLE_Connection::requestScan()
 {
@@ -150,6 +123,12 @@ void BLE_Connection::doScan()
             break;
         case ReadValueByHandle:
             readValueByHandle();
+            break;
+        case NotificationOn:
+            notificationOn();
+            break;
+        case NotificationOff:
+            notificationOff();
             break;
         default:
             qDebug() << "Default in switch case";
@@ -271,6 +250,63 @@ void BLE_Connection::readValueByHandle()
     ble_cmd_attclient_read_by_handle(connection_handle, 0x000e);
 }
 
+void BLE_Connection::notificationOn()
+{
+    uint8 data[] = {0x01, 0x00};
+    mutex.lock();
+    bd_addr temp = _addr;
+    mutex.unlock();
+    ble_cmd_attclient_attribute_write(getConnectionHandle(temp), 0x000f, sizeof(data), data);
+}
+
+void BLE_Connection::notificationOff()
+{
+    uint8 data[] = {0x00, 0x00};
+    mutex.lock();
+    bd_addr temp = _addr;
+    mutex.unlock();
+    ble_cmd_attclient_attribute_write(getConnectionHandle(temp), 0x000f, sizeof(data), data);
+}
+
+int BLE_Connection::getConnectionHandle(bd_addr adr)
+{
+    for (int i = 0; i < connected_devices_count; ++i) {
+        if(cmp_bdaddr(adr,connected_devices[i]) == 0){
+            return i;
+        }
+    }
+    return -1;
+}
+
+void print_bdaddr(bd_addr bdaddr)
+{
+    char str[20];
+    snprintf(str, sizeof(str)-1, "%02x:%02x:%02x:%02x:%02x:%02x",
+            bdaddr.addr[5],
+            bdaddr.addr[4],
+            bdaddr.addr[3],
+            bdaddr.addr[2],
+            bdaddr.addr[1],
+            bdaddr.addr[0]);
+
+    qDebug() << str;
+}
+
+/**
+ * Compare Bluetooth addresses
+ *
+ * @param first First address
+ * @param second Second address
+ * @return Zero if addresses are equal
+ */
+int cmp_bdaddr(bd_addr first, bd_addr second)
+{
+    int i;
+    for (i = 0; i < sizeof(bd_addr); i++) {
+        if (first.addr[i] != second.addr[i]) return 1;
+    }
+    return 0;
+}
 //=============FUNCTIONS FOR HANDELING EVENTS AND RESPONSES====================
 
 

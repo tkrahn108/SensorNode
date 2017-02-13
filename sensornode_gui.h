@@ -37,6 +37,10 @@ private slots:
 
     void on_pushButtonRead_clicked();
 
+    void on_checkBoxConnected_toggled(bool checked);
+
+    void on_checkBoxNotificationAL_toggled(bool checked);
+
 private:
     Ui::SensorNode_GUI *ui;
     QThread *thread;

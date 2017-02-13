@@ -23,6 +23,9 @@ SensorNode_GUI::SensorNode_GUI(QWidget *parent) :
     connect(thread, SIGNAL(started()), ble_worker, SLOT(doScan()));
     connect(ble_worker, SIGNAL(valueChanged(ble_message)), this, SLOT(setNewMessage(ble_message)), Qt::ConnectionType::QueuedConnection);
     connect(ble_worker, SIGNAL(aborted()), thread, SLOT(quit()));
+
+    ui->deviceListWidget->addItem("test");
+
 }
 
 SensorNode_GUI::~SensorNode_GUI()
@@ -97,4 +100,22 @@ void SensorNode_GUI::on_pushButtonDescriptorDiscover_clicked()
 void SensorNode_GUI::on_pushButtonRead_clicked()
 {
     ble_worker->requestMethod(BLE_Connection::ReadValueByHandle);
+}
+
+void SensorNode_GUI::on_checkBoxConnected_toggled(bool checked)
+{
+
+}
+
+void SensorNode_GUI::on_checkBoxNotificationAL_toggled(bool checked)
+{
+    bd_addr addr = {{0xe6, 0x27, 0x6b, 0xc2, 0x37, 0xe0}};
+    if(checked)
+    {
+        ble_worker->setAddr(addr);
+        ble_worker->requestMethod(BLE_Connection::NotificationOn);
+    } else {
+        ble_worker->setAddr(addr);
+        ble_worker->requestMethod(BLE_Connection::NotificationOff);
+    }
 }

@@ -221,11 +221,20 @@ void BLE_Connection::connect()
 
 void BLE_Connection::disconnect()
 {
-    //TODO change argument to connection_handle
-    ble_cmd_connection_disconnect(0);
-    qDebug() << "Try to disconnect!";
-    //ble_cmd_gap_end_procedure();
-    qDebug() << "disconnect requested";
+    mutex.lock();
+    bd_addr temp = _addr;
+    mutex.unlock();
+//    ble_cmd_connection_disconnect(1);
+    int tempConnectionHandle = getConnectionHandle(temp);
+    if(tempConnectionHandle != -1){
+        ble_cmd_connection_disconnect(tempConnectionHandle);
+        qDebug() << "Try to disconnect!";
+        //ble_cmd_gap_end_procedure();
+        qDebug() << "disconnect requested";
+     } else {
+        qDebug() << "No Connection Handle for this address";
+    }
+
 }
 
 void BLE_Connection::primaryServiceDiscovery()
@@ -270,7 +279,7 @@ void BLE_Connection::notificationOff()
 
 int BLE_Connection::getConnectionHandle(bd_addr adr)
 {
-    for (int i = 0; i < connected_devices_count; ++i) {
+    for (int i = 0; i < MAX_DEVICES; ++i) {
         if(cmp_bdaddr(adr,connected_devices[i]) == 0){
             return i;
         }

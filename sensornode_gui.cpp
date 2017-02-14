@@ -104,18 +104,24 @@ void SensorNode_GUI::on_pushButtonRead_clicked()
 
 void SensorNode_GUI::on_checkBoxConnected_toggled(bool checked)
 {
-
+    bd_addr addr = {{0xe6, 0x27, 0x6b, 0xc2, 0x37, 0xe0}};
+    ble_worker->setAddr(addr);
+    if(checked)
+    {
+        ble_worker->requestMethod(BLE_Connection::Connect);
+    } else {
+        ble_worker->requestMethod(BLE_Connection::Disconnect);
+    }
 }
 
 void SensorNode_GUI::on_checkBoxNotificationAL_toggled(bool checked)
 {
     bd_addr addr = {{0xe6, 0x27, 0x6b, 0xc2, 0x37, 0xe0}};
+    ble_worker->setAddr(addr);
     if(checked)
     {
-        ble_worker->setAddr(addr);
         ble_worker->requestMethod(BLE_Connection::NotificationOn);
     } else {
-        ble_worker->setAddr(addr);
         ble_worker->requestMethod(BLE_Connection::NotificationOff);
     }
 }

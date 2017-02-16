@@ -1,9 +1,13 @@
 #include "ble_connection.h"
 
 volatile HANDLE serial_handle;
-#define MAX_DEVICES 8
+//maximum number of devices we can connect to; limited
+#define MAX_CONNECTED_DEVICES 8
+//maximum number of device we want to scan
+#define MAX_SCANNED_DEVICES 50
 
-bd_addr connected_devices[MAX_DEVICES];
+bd_addr connected_devices[MAX_CONNECTED_DEVICES];
+bd_addr scanned_devices[MAX_SCANNED_DEVICES];
 uint8 primary_service_uuid[] = {0x00, 0x28};
 uint8 connection_handle;
 
@@ -44,6 +48,8 @@ int BLE_Connection::init()
 
         messageCaptured = false;
         connected_devices_count = 0;
+        scanned_devices_count = 0;
+        newAdvertisingDevice = false;
 
         //stop previous operation
         ble_cmd_gap_end_procedure();
@@ -61,7 +67,6 @@ void BLE_Connection::requestMethod(BLE_Connection::Method method)
     }
     QMutexLocker locker(&mutex);
     _method = method;
-
 }
 
 void BLE_Connection::setAddr(bd_addr addr)
@@ -129,6 +134,9 @@ void BLE_Connection::doScan()
             break;
         case NotificationOff:
             notificationOff();
+            break;
+        case DisconnectAll:
+            disconnectAll();
             break;
         default:
             qDebug() << "Default in switch case";
@@ -209,7 +217,7 @@ int BLE_Connection::read_message()
 void BLE_Connection::connect()
 {
     qDebug() << "Before:";
-    for(int j = 0; j < MAX_DEVICES-1; j++){
+    for(int j = 0; j < MAX_CONNECTED_DEVICES-1; j++){
         print_bdaddr(connected_devices[j]);
     }
 
@@ -235,6 +243,14 @@ void BLE_Connection::disconnect()
         qDebug() << "No Connection Handle for this address";
     }
 
+}
+
+void BLE_Connection::disconnectAll()
+{
+    //TODO do not loop over all possible connection handles
+    for(int i = 0; i <= MAX_CONNECTED_DEVICES; i++){
+        ble_cmd_connection_disconnect(i);
+    }
 }
 
 void BLE_Connection::primaryServiceDiscovery()
@@ -279,7 +295,7 @@ void BLE_Connection::notificationOff()
 
 int BLE_Connection::getConnectionHandle(bd_addr adr)
 {
-    for (int i = 0; i < MAX_DEVICES; ++i) {
+    for (int i = 0; i < MAX_CONNECTED_DEVICES-1; ++i) {
         if(cmp_bdaddr(adr,connected_devices[i]) == 0){
             return i;
         }
@@ -287,6 +303,27 @@ int BLE_Connection::getConnectionHandle(bd_addr adr)
     return -1;
 }
 
+/**
+ * Check whether address is found in scanned_devices.
+ *
+ * @brief checkScannedDevices
+ * @param bdaddr Address to compare
+ * @return true if address is found in scanned_devices
+ */
+bool checkScannedDevices(bd_addr bdaddr)
+{
+    for(int i = 0; i < scanned_devices_count; i++){
+        if(cmp_bdaddr(bdaddr,scanned_devices[i]) == 0) return true;
+    }
+
+    return false;
+}
+
+/**
+ * Print address.
+ * @brief print_bdaddr
+ * @param bdaddr Address to print
+ */
 void print_bdaddr(bd_addr bdaddr)
 {
     char str[20];
@@ -345,6 +382,11 @@ void ble_evt_gap_scan_response(const struct ble_msg_gap_scan_response_evt_t *msg
     message.rssi = msg->rssi;
     messageCaptured = true;
 
+//    if(!checkScannedDevices(msg->sender)){
+//        memcpy(scanned_devices[scanned_devices_count].addr, msg->sender.addr, sizeof(bd_addr));
+//        scanned_devices_count++;
+//    }
+
     free(name);
 }
 
@@ -364,7 +406,7 @@ void ble_evt_connection_status(const struct ble_msg_connection_status_evt_t *msg
         memcpy(connected_devices[msg->connection].addr, msg->address.addr, sizeof(bd_addr));
 
         qDebug() << "Connected:";
-        for(int j = 0; j < MAX_DEVICES-1; j++){
+        for(int j = 0; j < MAX_CONNECTED_DEVICES-1; j++){
             print_bdaddr(connected_devices[j]);
         }
 
@@ -386,7 +428,7 @@ void ble_evt_connection_disconnected(const struct ble_msg_connection_disconnecte
     memcpy(connected_devices[msg->connection].addr, addr, sizeof(bd_addr));
 
     qDebug() << "Disconnected:";
-    for(int j = 0; j < MAX_DEVICES-1; j++){
+    for(int j = 0; j < MAX_CONNECTED_DEVICES-1; j++){
         print_bdaddr(connected_devices[j]);
     }
 
@@ -435,8 +477,16 @@ void ble_evt_attclient_find_information_found(const ble_msg_attclient_find_infor
 
 void ble_evt_attclient_attribute_value(const ble_msg_attclient_attribute_value_evt_t *msg)
 {
-    int32_t value = (msg->value.data[3] << 24) |(msg->value.data[2] << 16) |(msg->value.data[1] << 8) | msg->value.data[0];
-    message.name = std::to_string(value);
-    qDebug() << "Value: " << value;
+    //conversion of lux value
+    uint16_t lux = (msg->value.data[1] << 8) | msg->value.data[0];
+    uint8_t k;
+    uint8_t exp = lux >> 12;
+    uint16_t mantisse = lux;
+    for(k = 12; k<=16; k++){
+        mantisse &= ~(1 << k);
+    }
+    double res = 0.01 * pow(2.0,(double)exp) * mantisse;
+    message.name = std::to_string(res);
+
     messageCaptured = true;
 }

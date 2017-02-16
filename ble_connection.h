@@ -27,9 +27,12 @@ Q_DECLARE_METATYPE(ble_message)
 static bool messageCaptured;
 static ble_message message;
 static int connected_devices_count;
+static int scanned_devices_count;
+static bool newAdvertisingDevice;
 
 int cmp_bdaddr(bd_addr first, bd_addr second);
 void print_bdaddr(bd_addr bdaddr);
+bool checkScannedDevices(bd_addr bdaddr);
 
 class BLE_Connection : public QObject
 {
@@ -56,7 +59,8 @@ public:
         DescriptorsDiscovery = 5,
         ReadValueByHandle = 6,
         NotificationOn = 7,
-        NotificationOff = 8
+        NotificationOff = 8,
+        DisconnectAll = 9
     };
 
     /**
@@ -68,6 +72,7 @@ public:
     void requestMethod(Method method);
 
     void setAddr(bd_addr addr);
+
 
 private:
     /**
@@ -88,6 +93,7 @@ private:
     void notificationOn();
     void notificationOff();
     int getConnectionHandle(bd_addr adr);
+    void disconnectAll();
 
 signals:
     void scanRequested();

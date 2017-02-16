@@ -30,7 +30,7 @@ SensorNode_GUI::SensorNode_GUI(QWidget *parent) :
 
 SensorNode_GUI::~SensorNode_GUI()
 {
-    ble_worker->requestMethod(BLE_Connection::Disconnect);
+    ble_worker->requestMethod(BLE_Connection::DisconnectAll);
     ble_worker->abort();
     thread->wait();
     qDebug()<<"Deleting thread and worker in Thread "<<this->QObject::thread()->currentThreadId();

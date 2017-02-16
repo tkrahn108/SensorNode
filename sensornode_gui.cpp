@@ -125,3 +125,4 @@ void SensorNode_GUI::on_checkBoxNotificationAL_toggled(bool checked)
         ble_worker->requestMethod(BLE_Connection::NotificationOff);
     }
 }
+
